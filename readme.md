@@ -9,5 +9,5 @@
 
 3. Clone the repo
     * Run ' git clone https://github.com/nebiont/rogue'
-    
-4. Run ' .\engine.py'
+
+4. Run 'py .\engine.py'
