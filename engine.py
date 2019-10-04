@@ -68,19 +68,22 @@ def main():
         player_turn_results = []
 
         if move and game_state == GameStates.PLAYERS_TURN:
-            dx, dy = move
-            destination_x = player.x + dx
-            destination_y = player.y + dy
+            if not move == 'wait':
+                dx, dy = move
+                destination_x = player.x + dx
+                destination_y = player.y + dy
 
-            if not game_map.is_blocked(destination_x, destination_y):
-                target = get_blocking_entities_at_location(entities, destination_x, destination_y)
+                if not game_map.is_blocked(destination_x, destination_y):
+                    target = get_blocking_entities_at_location(entities, destination_x, destination_y)
 
-                if target:
-                    attack_results = player.fighter.attack(target)
-                    player_turn_results.extend(attack_results)
-                else:
-                    player.move(dx, dy)
-                    fov_recompute = True
+                    if target:
+                        attack_results = player.fighter.attack(target)
+                        player_turn_results.extend(attack_results)
+                    else:
+                        player.move(dx, dy)
+                        fov_recompute = True
+                    game_state = GameStates.ENEMY_TURN
+            else:
                 game_state = GameStates.ENEMY_TURN
         if exit:
             return True
