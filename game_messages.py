@@ -14,10 +14,9 @@ class MessageLog:
         self.height = height
 
         # Store some dummy data in the MessageLog so that it starts filling in from the bottom of the screen.
-        i = 0
-        while i < self.height:
+        for i in range(self.height):
             self.messages.append(Message(''))
-            i += 1
+
 
     def add_message(self, message):
         # Split the message if necessary, among multiple lines
