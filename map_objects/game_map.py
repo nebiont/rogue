@@ -137,7 +137,7 @@ class GameMap:
 			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
 				
 				rand_item = randint(1, total_item_chance)
-				
+				#Okay guys so I looked at everything and tried this out. I create an array, and using the number chance I drop that many into the array. Then i choose one from the array randomly.
 
 				item_chance = randint(0, 100)
 
