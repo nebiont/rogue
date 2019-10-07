@@ -1,6 +1,8 @@
 import tcod as libtcod
 
 def handle_keys(key):
+    key_char = chr(key.c)
+    
     # Movement keys
     if key.vk == libtcod.KEY_UP or key.vk == libtcod.KEY_KP8:
         return {'move': (0, -1)}
@@ -19,7 +21,10 @@ def handle_keys(key):
     elif key.vk == libtcod.KEY_KP9:
         return {'move': (1, -1)}
     elif key.vk == libtcod.KEY_KP5:
-        return {'move': 'wait'}      
+        return {'move': 'wait'}
+
+    if key_char == 'g':
+        return {'pickup': True}
                         
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
