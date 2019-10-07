@@ -1,0 +1,24 @@
+0:
+  name: 'Healing Potion'
+  char: '!'
+  color: libtcod.violet
+  render_order: RenderOrder.ITEM
+  loot_chance: 70
+  description: Heals you with the power of friendship. A friendship which ceases the moment you drink.
+  item_component:
+    use_function: heal
+    kwargs:
+      amount: 4
+
+1:
+  name: 'Lightning Scroll'
+  char: '#'
+  color: libtcod.yellow
+  render_order: RenderOrder.ITEM
+  loot_chance: 30
+  description: Shoots spicey bolts of cracklin' lightning.
+  item_component:
+    use_function: cast_lightning
+    kwargs:
+        damage: 20
+        maximum_range: 5
