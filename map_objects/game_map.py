@@ -10,7 +10,7 @@ from components.fighter import Fighter
 from components.item import Item
 from item_functions import heal, cast_lightning, cast_fireball
 from render_functions import RenderOrder
-
+import definitions
 
 class GameMap:
 	def __init__(self, width, height):
@@ -100,7 +100,7 @@ class GameMap:
 		number_of_items = randint(0, max_items_per_room)
 
 		# Load item list so it can be used to generate items
-		item_stream = open(".\\data\\objects\\items.yaml", 'r')
+		item_stream = open(str(definitions.ROOT_DIR) + "\\data\\objects\\items.yaml", 'r')
 		item_list = yaml.load(item_stream)
 		loot_table = []
 

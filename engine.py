@@ -9,6 +9,10 @@ from components.fighter import Fighter
 from components.inventory import Inventory
 from death_functions import kill_monster, kill_player
 from game_messages import MessageLog, Message
+from pygame import mixer
+import definitions
+
+
 
 def main():
 	#define main variables
@@ -30,6 +34,7 @@ def main():
 	fov_radius = 10
 	max_monsters_per_room = 3
 	max_items_per_room = 2
+
 	
 	colors = {
 		'dark_wall': libtcod.Color(0, 0, 100),
@@ -45,13 +50,12 @@ def main():
 	entities = [player]
 
 	# Load font and create root console (what you see)
-	libtcod.console_set_custom_font('Nice_curses_12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+	libtcod.console_set_custom_font(str(definitions.ROOT_DIR) + '\\Nice_curses_12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
 	libtcod.console_init_root(screen_width, screen_height, "Brett's Dungeon", False)
 
 	# Create game area and info area, this will be drawn to our root console so that we can see them
 	con = libtcod.console_new(screen_width, screen_height)
 	panel = libtcod.console_new(screen_width, panel_height)
-
 	# Create our map
 	game_map = GameMap(map_width, map_height)
 	game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room, max_items_per_room)
@@ -73,6 +77,11 @@ def main():
 
 	# Store the item that the player used to enter targeting mode (ie lightning scroll). This is so that we know what item we need to remove from inventory etc.
 	targeting_item = None
+
+	# Start music
+	mixer.init()
+	mixer.music.load(str(definitions.ROOT_DIR) + '\\data\\music\\bgm1.mp3')
+	mixer.music.play(loops=-1)
 
 	#Our main loop
 	while not libtcod.console_is_window_closed():
