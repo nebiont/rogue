@@ -66,4 +66,4 @@ def cast_fireball(*args, **kwargs):
             results.append({'message': Message('The {0} gets burned for {1} hit points'.format(entity.name, damage), libtcod.orange)})
             results.extend(entity.fighter.take_damage(damage))
 
-        return results
+    return results
