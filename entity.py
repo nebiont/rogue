@@ -1,7 +1,5 @@
 import tcod as libtcod
 import math
-from components.ai import BasicMonster
-from components.fighter import Fighter
 from render_functions import RenderOrder
 
 

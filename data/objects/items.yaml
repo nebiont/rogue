@@ -3,7 +3,7 @@
   char: '!'
   color: libtcod.violet
   render_order: RenderOrder.ITEM
-  loot_chance: 70
+  loot_chance: 45
   description: Heals you with the power of friendship. A friendship which ceases the moment you drink.
   args:
     use_function: heal
@@ -15,7 +15,7 @@
   char: '#'
   color: libtcod.yellow
   render_order: RenderOrder.ITEM
-  loot_chance: 30
+  loot_chance: 10
   description: Shoots spicey bolts of cracklin' lightning.
   args:
     use_function: "cast_lightning"
@@ -28,7 +28,7 @@
   char: '#'
   color: libtcod.red
   render_order: RenderOrder.ITEM
-  loot_chance: 30
+  loot_chance: 10
   description: Shoots spicey bolts of cracklin' lightning.
   args:
     use_function: cast_fireball
@@ -37,3 +37,34 @@
   kwargs:
     damage: 12
     radius: 3
+
+3:
+  name: 'Confuse Scroll'
+  char: '#'
+  color: libtcod.pink
+  render_order: RenderOrder.ITEM
+  loot_chance: 15
+  description: The words written on the scroll make no sense to you.
+  args:
+    use_function: cast_confuse
+    targeting: "True"
+    targeting_message: Message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
+  kwargs:
+    number_of_turns: 10
+
+4:
+  name: 'Polymorph Scroll'
+  char: '#'
+  color: libtcod.light_blue
+  render_order: RenderOrder.ITEM
+  loot_chance: 10
+  description: On the scroll is a hastily drawn picture of a sheep.
+  args:
+    use_function: cast_polymorph
+    targeting: "True"
+    targeting_message: Message('Left-click an enemy to polymorph it, or right-click to cancel.', libtcod.light_cyan)
+  kwargs:
+    number_of_turns: 10
+    polymorph_char: '&'
+    polymorph_animal: 'sheep'
+

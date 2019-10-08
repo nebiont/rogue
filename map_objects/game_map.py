@@ -8,7 +8,7 @@ from entity import Entity
 from components.ai import BasicMonster
 from components.fighter import Fighter
 from components.item import Item
-from item_functions import heal, cast_lightning, cast_fireball
+from item_functions import heal, cast_lightning, cast_fireball, cast_confuse, cast_polymorph
 from render_functions import RenderOrder
 import definitions
 

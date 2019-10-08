@@ -1,6 +1,7 @@
 import tcod as libtcod
 
 from game_messages import Message
+from components.ai import ConfusedMonster, PolymorphedMonster
 
 def heal(*args, **kwargs):
     entity = args[0]
@@ -65,5 +66,65 @@ def cast_fireball(*args, **kwargs):
         if entity.distance(target_x, target_y) <= radius and entity.fighter:
             results.append({'message': Message('The {0} gets burned for {1} hit points'.format(entity.name, damage), libtcod.orange)})
             results.extend(entity.fighter.take_damage(damage))
+
+    return results
+
+def cast_confuse(*args, **kwargs):
+    entities = kwargs.get('entities')
+    fov_map = kwargs.get('fov_map')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
+    number_of_turns = kwargs.get('number_of_turns')
+
+    results = []
+
+    if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
+        results.append({'consumed': False, 'message': Message('You cannot target a tile outside of your view.', libtcod.yellow)})
+        return results
+
+    for entity in entities:
+        if entity.x == target_x and entity.y == target_y and entity.ai:
+            confused_ai = ConfusedMonster(entity.ai, number_of_turns=number_of_turns)
+
+            confused_ai.owner = entity
+            entity.ai = confused_ai
+            entity.color = libtcod.dark_purple
+
+            results.append({'consumed': True, 'message': Message('The eyes of the {0} look vacant and they begin to stumble around.'.format(entity.name), libtcod.light_green)})
+
+            break
+    else:
+            results.append({'consumed': False, 'message': Message('There is no targetable enemy at that location.', libtcod.yellow)})
+
+    return results
+
+def cast_polymorph(*args, **kwargs):
+    entities = kwargs.get('entities')
+    fov_map = kwargs.get('fov_map')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
+    number_of_turns = kwargs.get('number_of_turns')
+    polymorph_char = kwargs.get('polymorph_char')
+    polymorph_animal = kwargs.get('polymorph_animal')
+
+    results = []
+
+    if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
+        results.append({'consumed': False, 'message': Message('You cannot target a tile outside of your view.', libtcod.yellow)})
+        return results
+
+    for entity in entities:
+        if entity.x == target_x and entity.y == target_y and entity.ai:
+            polymorph_ai = PolymorphedMonster(entity.ai, entity.char, number_of_turns=number_of_turns)
+
+            polymorph_ai.owner = entity
+            entity.ai = polymorph_ai
+            entity.char = polymorph_char
+
+            results.append({'consumed': True, 'message': Message('The {0} dissapears in a puff of smoke, as the smoke clears a {1} has taken its place.'.format(entity.name, polymorph_animal), libtcod.light_green)})
+
+            break
+    else:
+            results.append({'consumed': False, 'message': Message('There is no targetable enemy at that location.', libtcod.yellow)})
 
     return results

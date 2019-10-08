@@ -81,7 +81,7 @@ def main():
 	# Start music
 	mixer.init()
 	mixer.music.load(str(definitions.ROOT_DIR) + '\\data\\music\\bgm1.mp3')
-	mixer.music.play(loops=-1)
+	#mixer.music.play(loops=-1)
 
 	#Our main loop
 	while not libtcod.console_is_window_closed():
