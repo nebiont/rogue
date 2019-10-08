@@ -1,13 +1,14 @@
 import tcod as libtcod
 import yaml
 from random import randint
+from game_messages import Message
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 from entity import Entity
 from components.ai import BasicMonster
 from components.fighter import Fighter
 from components.item import Item
-from item_functions import heal, cast_lightning
+from item_functions import heal, cast_lightning, cast_fireball
 from render_functions import RenderOrder
 
 

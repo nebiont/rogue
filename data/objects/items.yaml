@@ -18,7 +18,22 @@
   loot_chance: 30
   description: Shoots spicey bolts of cracklin' lightning.
   args:
-    use_function: cast_lightning
+    use_function: "cast_lightning"
   kwargs:
     damage: 20
     maximum_range: 5
+
+2:
+  name: 'Fireball Scroll'
+  char: '#'
+  color: libtcod.red
+  render_order: RenderOrder.ITEM
+  loot_chance: 30
+  description: Shoots spicey bolts of cracklin' lightning.
+  args:
+    use_function: cast_fireball
+    targeting: "True"
+    targeting_message: Message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
+  kwargs:
+    damage: 12
+    radius: 3
