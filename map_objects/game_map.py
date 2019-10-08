@@ -136,22 +136,20 @@ class GameMap:
 			y = randint(room.y1 + 1, room.y2 - 1)
 
 			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-				item_roll = randint(0, len(loot_table))
+				item_roll = randint(1, len(loot_table))
 				item_object = item_list[loot_table[item_roll][0]]
-				kwargs = []
+				args = {}
+				kwargs = {}
 
-				for i in item_object['item_component']['kwargs']:
-					kwargs.append(i)
+				for k, v in item_object['args'].items():
+					args[k] = eval(v)
 
-				item_component = Item(use_function=item_object['item_component'].get('use_function'), **kwargs)
-				item = Entity(x, y, item_object.get('char'), item_object.get('color'), item_object.get('name'), render_order=item_object.get('render_order'), item=item_component)
-				# if item_chance < 70:
-				# 	item_component = Item(use_function=heal, amount=4)
-				# 	item = Entity(x, y, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
-					
-				# else:
-				# 	item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
-				# 	item = Entity(x, y, '#', libtcod.yellow, 'Lightning Scroll', render_order=RenderOrder.ITEM, item=item_component)
+				for k, v in item_object['kwargs'].items():
+					kwargs[k] = v
+
+				item_component = Item(**args, **kwargs)
+				#item_component = Item(use_function=eval(item_object['args'].get('use_function')), **kwargs)
+				item = Entity(x, y, item_object.get('char'), eval(item_object.get('color')), item_object.get('name'), render_order=eval(item_object.get('render_order')), item=item_component)
 
 				entities.append(item)
 		  

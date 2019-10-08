@@ -1,5 +1,5 @@
 import tcod as libtcod
-from input_handlers import handle_keys
+from input_handlers import handle_keys, handle_mouse
 from entity import Entity, get_blocking_entities_at_location
 from render_functions import clear_all, render_all, RenderOrder
 from map_objects.game_map import GameMap
@@ -76,6 +76,7 @@ def main():
 		# Check for input
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
 		action = handle_keys(key, game_state)
+		mouse_action = handle_mouse(mouse)
 
 		# Recompute FOV
 		if fov_recompute:
@@ -97,6 +98,8 @@ def main():
 		inventory_index = action.get('inventory_index')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
+		left_click = mouse_action.get('left_click')
+		right_click = mouse_action.get('right_click')
 
 		#Instatiate our message queue for the players turn
 		player_turn_results = []

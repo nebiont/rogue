@@ -5,10 +5,10 @@
   render_order: RenderOrder.ITEM
   loot_chance: 70
   description: Heals you with the power of friendship. A friendship which ceases the moment you drink.
-  item_component:
+  args:
     use_function: heal
-    kwargs:
-      amount: 4
+  kwargs:
+    amount: 4
 
 1:
   name: 'Lightning Scroll'
@@ -17,8 +17,8 @@
   render_order: RenderOrder.ITEM
   loot_chance: 30
   description: Shoots spicey bolts of cracklin' lightning.
-  item_component:
+  args:
     use_function: cast_lightning
-    kwargs:
-        damage: 20
-        maximum_range: 5
+  kwargs:
+    damage: 20
+    maximum_range: 5
