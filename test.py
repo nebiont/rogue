@@ -6,7 +6,7 @@ item_list = yaml.load(item_stream)
 loot_table = []
 
 
-for i in item_list:
+print(item_list[0]['item_component']['kwargs'])
 # for i in item_list:
 #     loot_chance = item_list[i].get('loot_chance')
 #     for r in range(loot_chance):

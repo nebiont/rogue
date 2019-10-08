@@ -1,0 +1,1 @@
+Investigate using pyYAML to create the items, monsters etc. directly. This would avoid having to eval() the strings. See Constructors, representerm resolvers:https://pyyaml.org/wiki/PyYAMLDocumentation
