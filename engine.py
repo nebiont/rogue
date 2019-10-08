@@ -195,7 +195,7 @@ def main():
 				message_log.add_message(message)
 
 			if targeting_cancelled:
-				game_map = previous_game_state
+				game_state = previous_game_state
 
 				message_log.add_message(Message('Targeting cancelled'))
 
