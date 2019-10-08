@@ -101,11 +101,7 @@ class GameMap:
 		# Load item list so it can be used to generate items
 		item_stream = open(".\\data\\objects\\items.yaml", 'r')
 		item_list = yaml.load(item_stream)
-		total_item_chance = 0
-
-		# Calculate total item loot chance weighting so that we can use this in our loot alogrithm
-		for x in item_list.values():
-			total_item_chance += x.get('loot_chance')
+		loot_table = []
 
 
 		for i in range(number_of_monsters):
@@ -127,27 +123,35 @@ class GameMap:
 
 				entities.append(monster)
 
-		
-			
+		# Generate loot table that we'll use to pick our items from
+		# Iems are distributed in the loot table based on rarity
+		for i in item_list:
+			loot_chance = item_list[i].get('loot_chance')
+			for r in range(loot_chance):
+				loot_table_item = [i, loot_chance]
+				loot_table.append(loot_table_item)
 
 		for i in range(number_of_items):
 			x = randint(room.x1 + 1, room.x2 - 1)
 			y = randint(room.y1 + 1, room.y2 - 1)
 
 			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-				
-				rand_item = randint(1, total_item_chance)
-				#Okay guys so I looked at everything and tried this out. I create an array, and using the number chance I drop that many into the array. Then i choose one from the array randomly.
+				item_roll = randint(0, len(loot_table))
+				item_object = item_list[loot_table[item_roll][0]]
+				kwargs = []
 
-				item_chance = randint(0, 100)
+				for i in item_object['item_component']['kwargs']:
+					kwargs.append(i)
 
-				if item_chance < 70:
-					item_component = Item(use_function=heal, amount=4)
-					item = Entity(x, y, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
+				item_component = Item(use_function=item_object['item_component'].get('use_function'), **kwargs)
+				item = Entity(x, y, item_object.get('char'), item_object.get('color'), item_object.get('name'), render_order=item_object.get('render_order'), item=item_component)
+				# if item_chance < 70:
+				# 	item_component = Item(use_function=heal, amount=4)
+				# 	item = Entity(x, y, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
 					
-				else:
-					item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
-					item = Entity(x, y, '#', libtcod.yellow, 'Lightning Scroll', render_order=RenderOrder.ITEM, item=item_component)
+				# else:
+				# 	item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
+				# 	item = Entity(x, y, '#', libtcod.yellow, 'Lightning Scroll', render_order=RenderOrder.ITEM, item=item_component)
 
 				entities.append(item)
 		  
