@@ -76,6 +76,7 @@ def cast_confuse(*args, **kwargs):
     target_y = kwargs.get('target_y')
     number_of_turns = kwargs.get('number_of_turns')
 
+
     results = []
 
     if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
@@ -84,7 +85,7 @@ def cast_confuse(*args, **kwargs):
 
     for entity in entities:
         if entity.x == target_x and entity.y == target_y and entity.ai:
-            confused_ai = ConfusedMonster(entity.ai, number_of_turns=number_of_turns)
+            confused_ai = ConfusedMonster(entity.ai, entity.color, number_of_turns=number_of_turns)
 
             confused_ai.owner = entity
             entity.ai = confused_ai
@@ -106,6 +107,7 @@ def cast_polymorph(*args, **kwargs):
     number_of_turns = kwargs.get('number_of_turns')
     polymorph_char = kwargs.get('polymorph_char')
     polymorph_animal = kwargs.get('polymorph_animal')
+    polymorph_color = kwargs.get('polymorph_color')
 
     results = []
 
@@ -115,11 +117,12 @@ def cast_polymorph(*args, **kwargs):
 
     for entity in entities:
         if entity.x == target_x and entity.y == target_y and entity.ai:
-            polymorph_ai = PolymorphedMonster(entity.ai, entity.char, number_of_turns=number_of_turns)
+            polymorph_ai = PolymorphedMonster(entity.ai, entity.char, entity.color, number_of_turns=number_of_turns)
 
             polymorph_ai.owner = entity
             entity.ai = polymorph_ai
             entity.char = polymorph_char
+            entity.color = polymorph_color
 
             results.append({'consumed': True, 'message': Message('The {0} dissapears in a puff of smoke, as the smoke clears a {1} has taken its place.'.format(entity.name, polymorph_animal), libtcod.light_green)})
 

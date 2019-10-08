@@ -57,14 +57,15 @@
   char: '#'
   color: libtcod.light_blue
   render_order: RenderOrder.ITEM
-  loot_chance: 10
+  loot_chance: 100
   description: On the scroll is a hastily drawn picture of a sheep.
   args:
     use_function: cast_polymorph
     targeting: "True"
-    targeting_message: Message('Left-click an enemy to polymorph it, or right-click to cancel.', libtcod.light_cyan)
+    targeting_message: Message('Left-click an enemy to polymorph it, or right-click to cancel.', libtcod.white)
   kwargs:
     number_of_turns: 10
     polymorph_char: '&'
     polymorph_animal: 'sheep'
+    polymorph_color: [255, 255, 255]
 

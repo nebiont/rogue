@@ -1,12 +1,18 @@
 import yaml
+import tcod as libtcod
 from random import randint
 
-item_stream = open('.\\data\\objects\\items.yaml', 'r')
-item_list = yaml.load(item_stream)
-loot_table = []
+test = libtcod.Color(255, 255, 0)
+print(test) 
+
+libtcod.white
+
+# item_stream = open('.\\data\\objects\\items.yaml', 'r')
+# item_list = yaml.load(item_stream)
+# loot_table = []
 
 
-print(item_list[0]['item_component']['kwargs'])
+# print(item_list[0]['item_component']['kwargs'])
 # for i in item_list:
 #     loot_chance = item_list[i].get('loot_chance')
 #     for r in range(loot_chance):
