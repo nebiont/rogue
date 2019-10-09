@@ -11,6 +11,7 @@ from components.item import Item
 from item_functions import heal, cast_lightning, cast_fireball, cast_confuse, cast_polymorph
 from render_functions import RenderOrder
 import definitions
+import os
 
 class GameMap:
 	def __init__(self, width, height):
@@ -100,7 +101,7 @@ class GameMap:
 		number_of_items = randint(0, max_items_per_room)
 
 		# Load item list so it can be used to generate items
-		item_stream = open(str(definitions.ROOT_DIR) + "\\data\\objects\\items.yaml", 'r')
+		item_stream = open(os.path.join(definitions.ROOT_DIR,'data\\objects\\items.yaml'), 'r')
 		item_list = yaml.load(item_stream)
 		loot_table = []
 
@@ -129,7 +130,7 @@ class GameMap:
 		for i in item_list:
 			loot_chance = item_list[i].get('loot_chance')
 			for r in range(loot_chance):
-				loot_table_item = [i, loot_chance]
+				loot_table_item = i
 				loot_table.append(loot_table_item)
 
 		for i in range(number_of_items):
@@ -137,8 +138,8 @@ class GameMap:
 			y = randint(room.y1 + 1, room.y2 - 1)
 
 			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-				item_roll = randint(1, len(loot_table))
-				item_object = item_list[loot_table[item_roll][0]]
+				item_roll = randint(0, len(loot_table) - 1)
+				item_object = item_list[loot_table[item_roll]]
 				args = {}
 				kwargs = {}
 

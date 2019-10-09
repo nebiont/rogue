@@ -3,7 +3,7 @@
   char: '!'
   color: libtcod.violet
   render_order: RenderOrder.ITEM
-  loot_chance: 45
+  loot_chance: 50
   description: Heals you with the power of friendship. A friendship which ceases the moment you drink.
   args:
     use_function: heal
@@ -15,7 +15,7 @@
   char: '#'
   color: libtcod.yellow
   render_order: RenderOrder.ITEM
-  loot_chance: 10
+  loot_chance: 5
   description: Shoots spicey bolts of cracklin' lightning.
   args:
     use_function: "cast_lightning"
@@ -28,7 +28,7 @@
   char: '#'
   color: libtcod.red
   render_order: RenderOrder.ITEM
-  loot_chance: 10
+  loot_chance: 8
   description: Shoots spicey bolts of cracklin' lightning.
   args:
     use_function: cast_fireball
@@ -43,7 +43,7 @@
   char: '#'
   color: libtcod.pink
   render_order: RenderOrder.ITEM
-  loot_chance: 15
+  loot_chance: 5
   description: The words written on the scroll make no sense to you.
   args:
     use_function: cast_confuse
@@ -57,7 +57,7 @@
   char: '#'
   color: libtcod.light_blue
   render_order: RenderOrder.ITEM
-  loot_chance: 100
+  loot_chance: 10
   description: On the scroll is a hastily drawn picture of a sheep.
   args:
     use_function: cast_polymorph

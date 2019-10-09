@@ -9,6 +9,7 @@ from death_functions import kill_monster, kill_player
 from game_messages import Message
 from pygame import mixer
 import definitions
+import os
 
 
 
@@ -17,9 +18,11 @@ def main():
 	#define main variables
 	constants = get_constants()
 	
+	# Limit FPS to 100 so we dont kill CPUs
+	libtcod.sys_set_fps(100)
 
 	# Load font and create root console (what you see)
-	libtcod.console_set_custom_font(str(definitions.ROOT_DIR) + '\\Nice_curses_12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+	libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
 	libtcod.console_init_root(constants['screen_width'], constants['screen_height'], "Brett's Dungeon", False)
 
 	# Create game area and info area, this will be drawn to our root console so that we can see them
@@ -44,8 +47,8 @@ def main():
 
 	# Start music
 	mixer.init()
-	mixer.music.load(str(definitions.ROOT_DIR) + '\\data\\music\\bgm1.mp3')
-	#mixer.music.play(loops=-1)
+	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data\\music\\bgm1.mp3'))
+	mixer.music.play(loops=-1)
 
 	#Our main loop
 	while not libtcod.console_is_window_closed():
