@@ -4,3 +4,4 @@
 *.pyc
 *.pyo
 *.spec
+setup.py
