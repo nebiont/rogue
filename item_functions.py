@@ -117,7 +117,7 @@ def cast_polymorph(*args, **kwargs):
 
     for entity in entities:
         if entity.x == target_x and entity.y == target_y and entity.ai:
-            polymorph_ai = PolymorphedMonster(entity.ai, entity.char, entity.color, number_of_turns=number_of_turns)
+            polymorph_ai = PolymorphedMonster(entity.ai, entity.char, entity.color, entity.fighter.hp, number_of_turns=number_of_turns)
 
             polymorph_ai.owner = entity
             entity.ai = polymorph_ai

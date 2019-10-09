@@ -1,78 +1,42 @@
 import tcod as libtcod
 from input_handlers import handle_keys, handle_mouse
-from entity import Entity, get_blocking_entities_at_location
-from render_functions import clear_all, render_all, RenderOrder
-from map_objects.game_map import GameMap
+from loader_functions.initialize_new_game import get_constants, get_game_variables
+from entity import get_blocking_entities_at_location
+from render_functions import clear_all, render_all
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
-from components.fighter import Fighter
-from components.inventory import Inventory
 from death_functions import kill_monster, kill_player
-from game_messages import MessageLog, Message
+from game_messages import Message
 from pygame import mixer
 import definitions
 
 
 
+
 def main():
 	#define main variables
-	screen_width = 80
-	screen_height = 50
-	bar_width = 20
-	panel_height = 7
-	panel_y = screen_height - panel_height
-	message_x = bar_width + 2
-	message_width = screen_width - bar_width - 2
-	message_height = panel_height - 1
-	map_width = 80
-	map_height = 43
-	room_max_size = 10
-	room_min_size = 6
-	max_rooms = 30
-	fov_algorithm = libtcod.FOV_PERMISSIVE_2
-	fov_light_walls = True
-	fov_radius = 10
-	max_monsters_per_room = 3
-	max_items_per_room = 2
-
+	constants = get_constants()
 	
-	colors = {
-		'dark_wall': libtcod.Color(0, 0, 100),
-		'dark_ground': libtcod.Color(50, 50, 150),
-		'light_wall': libtcod.Color(130, 110, 50),
-		'light_ground': libtcod.Color(200, 180, 50)
-	}
-	
-	# Define entities
-	fighter_component = Fighter(hp=30, defense=2, power=5)
-	inevntory_component = Inventory(26)
-	player = Entity(0, 0, 1, libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inevntory_component)
-	entities = [player]
 
 	# Load font and create root console (what you see)
 	libtcod.console_set_custom_font(str(definitions.ROOT_DIR) + '\\Nice_curses_12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
-	libtcod.console_init_root(screen_width, screen_height, "Brett's Dungeon", False)
+	libtcod.console_init_root(constants['screen_width'], constants['screen_height'], "Brett's Dungeon", False)
 
 	# Create game area and info area, this will be drawn to our root console so that we can see them
-	con = libtcod.console_new(screen_width, screen_height)
-	panel = libtcod.console_new(screen_width, panel_height)
-	# Create our map
-	game_map = GameMap(map_width, map_height)
-	game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room, max_items_per_room)
+	con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
+	panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
+
+	player, entities, game_map, message_log, game_state = get_game_variables(constants)
 
 	# Intialize FOV map.
 	fov_recompute = True # Recompute FOV after the player moves
 	fov_map = initialize_fov(game_map)
 
-	# Create message log
-	message_log = MessageLog(message_x, message_width, message_height)
 
 	# Capture keyboard and mouse input
 	key = libtcod.Key()
 	mouse = libtcod.Mouse()
 
-	# Initialize the game state
-	game_state = GameStates.PLAYERS_TURN
 	previous_game_state = game_state
 
 	# Store the item that the player used to enter targeting mode (ie lightning scroll). This is so that we know what item we need to remove from inventory etc.
@@ -92,10 +56,10 @@ def main():
 
 		# Recompute FOV
 		if fov_recompute:
-			recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
+			recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
 		
 		# Draw our scene
-		render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state)
+		render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], constants['colors'], game_state)
 		fov_recompute = False
 		libtcod.console_flush()
 
