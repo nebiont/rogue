@@ -47,7 +47,7 @@ def main():
 
 	# Start music
 	mixer.init()
-	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data\\music\\bgm1.mp3'))
+	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm1.mp3'))
 	mixer.music.play(loops=-1)
 
 	#Our main loop

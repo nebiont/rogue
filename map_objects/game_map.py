@@ -101,7 +101,7 @@ class GameMap:
 		number_of_items = randint(0, max_items_per_room)
 
 		# Load item list so it can be used to generate items
-		item_stream = open(os.path.join(definitions.ROOT_DIR,'data\\objects\\items.yaml'), 'r')
+		item_stream = open(os.path.join(definitions.ROOT_DIR,'data','objects','items.yaml'), 'r')
 		item_list = yaml.load(item_stream)
 		loot_table = []
 
