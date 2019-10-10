@@ -22,7 +22,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 	libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state):
+def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state):
 	# draw all the tiles in the game map
 	if fov_recompute:
 		for y in range(game_map.height):
@@ -42,6 +42,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 					else:
 						libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)			
 	
+	
+	
+
 	#draw all entities in the list
 	entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
 	for entity in entities_in_render_order:
@@ -49,6 +52,13 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
 	libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 	
+	#draw mouse cursor
+	cursor = libtcod.console_new(1, 1)
+	libtcod.console_set_default_foreground(cursor, libtcod.white)
+	cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
+	libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
+	
+	#clear info panel
 	libtcod.console_set_default_background(panel, libtcod.black)
 	libtcod.console_clear(panel)
 

@@ -5,7 +5,10 @@ def menu(con, header, options, width, screen_width, screen_height):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
 
     # calculate total height for the header (after auto-wrap) and one line per option
-    header_height = libtcod.console_get_height_rect(con, 0, 0, width, screen_height, header)
+    if header == None:
+        header_height = 0
+    else:
+        header_height = libtcod.console_get_height_rect(con, 0, 0, width, screen_height, header)
     height = len(options) + header_height
 
     # create an off-screen console that represents the menu's window
@@ -15,7 +18,8 @@ def menu(con, header, options, width, screen_width, screen_height):
     # print the header, with auto-wrap
     libtcod.console_set_default_foreground(window, libtcod.white)
     window.draw_rect(0, 0, width, height, 0, bg=libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_SCREEN, libtcod.LEFT, header)
+    if header != None:
+        libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_SCREEN, libtcod.LEFT, header)
 
     # print all the options
     y = header_height
@@ -37,15 +41,19 @@ def inventory_menu(con, header, inventory, inventory_width, screen_width, screen
         options = ['Inventory is empty']
     else:
         options = [item.name for item in inventory.items]
+        options.sort()
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
 def main_menu(con, background_image, screen_width, screen_height):
     libtcod.image_blit_2x(background_image, 0, 0, 0)
 
-    libtcod.console_set_default_foreground(0, libtcod_yellow)
+    libtcod.console_set_default_foreground(0, libtcod.yellow)
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, libtcod.BKGND_NONE, libtcod.CENTER, 
         'A Song of Pong and Moustache')
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), libtcod.BKGND_NONE, libtcod.CENTER,
         'By Don Carruthers')
-    menu(con, '',['Play a new game', 'Continue last game', 'Quit'], 24, screen_width, screen_height)
+    menu(con, None,['Play a new game', 'Continue last game', 'Quit'], 24, screen_width, screen_height)
+
+def message_box(con, header, width, screen_width, screen_height):
+    menu(con, header, [], width, screen_width, screen_height)
