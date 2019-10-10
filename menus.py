@@ -24,8 +24,8 @@ def menu(con, header, options, width, screen_width, screen_height, list=True):
     if header != None:
         libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_SCREEN, libtcod.LEFT, header)
         # add 1 line space between the header and the rest
-        header_height += 1  
-        height += 1  
+        header_height += 2  
+        #height += 1  
 
     # print all the options
     text_height = 0
@@ -45,16 +45,16 @@ def menu(con, header, options, width, screen_width, screen_height, list=True):
             libtcod.console_print_rect_ex(window, 0, y, width, text_height , libtcod.BKGND_NONE, libtcod.LEFT, options_text)
             y += text_height
 
-    height = (height + text_height)
+    height = y
     # draw box for window
 
-    window_box.draw_rect(0, 0, width + 1, height + 1, 0, bg=libtcod.white)
+    window_box.draw_rect(0, 0, width + 1, height + 2, 0, bg=libtcod.white)
 
     # blit the contents of "window" to the root console
     x = int(screen_width / 2 - width / 2)
     y = int(screen_height / 2 - height / 2)
-    libtcod.console_blit(window_box, 0, 0, width + 1, height + 1, 0, x - 1, y - 1, 1.0, 0.4)
-    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0)
+    libtcod.console_blit(window_box, 0, 0, width + 1, height + 2, 0, x - 1, y - 1, 1.0, 0.4)
+    libtcod.console_blit(window, 0, 0, width, height + 1, 0, x, y, 1.0, 0)
 
 def inventory_menu(con, header, inventory, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
@@ -78,3 +78,13 @@ def main_menu(con, background_image, screen_width, screen_height):
 
 def message_box(con, header, width, screen_width, screen_height):
     menu(con, header, [], width, screen_width, screen_height)
+
+def entity_description(con, description_list, description_index, width, screen_width, screen_height):
+    if len(description_list) > 1:
+        options = []
+        options.append(description_list[description_index].description)
+        options.append('\n')
+        options.append ('Left-click to cycle through entries')
+        menu(con, description_list[description_index].name, options , width, screen_width, screen_height, list=False)
+    else:
+        menu(con, description_list[description_index].name, [description_list[description_index].description], width, screen_width, screen_height, list=False)

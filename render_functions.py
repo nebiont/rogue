@@ -1,7 +1,7 @@
 import tcod as libtcod
 from enum import Enum
 from game_states import GameStates
-from menus import inventory_menu, message_box, menu
+from menus import inventory_menu, entity_description
 
 class RenderOrder(Enum):
 	CORPSE = 1
@@ -22,7 +22,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 	libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state):
+def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state, description_list, description_index):
 	# draw all the tiles in the game map
 	if fov_recompute:
 		for y in range(game_map.height):
@@ -79,10 +79,9 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 			inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.'
 
 		inventory_menu(con, inventory_title, player.inventory, 50, screen_width, screen_height)
-
-	for entity in entities:
-		if entity.x == mouse.cx and entity.y == mouse.cy:
-			menu(con, entity.name, [entity.description], 50, screen_width, screen_height, list=False)
+	
+	if len(description_list) > 0:
+		entity_description(con, description_list, description_index, 50, screen_width, screen_height)
 
 
 def clear_all(con, entities):

@@ -111,6 +111,13 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 	# Store the item that the player used to enter targeting mode (ie lightning scroll). This is so that we know what item we need to remove from inventory etc.
 	targeting_item = None
 
+	# For showing object descriptions
+	description_recompute = True
+	description_list = []
+	description_index = 0	
+	prev_mouse_y = None
+	prev_mouse_x = None
+
 	# Start music
 	mixer.init()
 	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm1.mp3'))
@@ -125,8 +132,38 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		if fov_recompute:
 			recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
 		
+	
+		# Show object descriptions
+		if description_recompute == True:
+
+			for entity in entities:
+				if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
+					description_list = []
+					description_index = 0
+				if entity.x == mouse.cx and entity.y == mouse.cy:
+					description_list.append(entity)
+					prev_mouse_x = mouse.cx
+					prev_mouse_y = mouse.cy
+		
+				
+
+			
+		if len(description_list) > 0:
+			description_recompute = False
+			# We need to check to see if the mouse position changed and then clear our description list if it did, otherwise it will keep growing
+			if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
+				description_list = []
+				description_index = 0
+				description_recompute = True
+			if mouse.lbutton_pressed:
+				description_index += 1
+			if description_index > (len(description_list) - 1):
+				description_index = 0
+
+
+		
 		# Draw our scene
-		render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], constants['colors'], game_state)
+		render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], constants['colors'], game_state, description_list, description_index)
 		fov_recompute = False
 		libtcod.console_flush()
 
