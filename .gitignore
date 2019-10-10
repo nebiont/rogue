@@ -3,6 +3,5 @@
 /dist/
 *.pyc
 *.pyo
-*.spec
 setup.py
 savegame.*

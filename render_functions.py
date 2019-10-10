@@ -1,7 +1,7 @@
 import tcod as libtcod
 from enum import Enum
 from game_states import GameStates
-from menus import inventory_menu
+from menus import inventory_menu, message_box, menu
 
 class RenderOrder(Enum):
 	CORPSE = 1
@@ -74,11 +74,15 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 
 	if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
 		if game_state == GameStates.SHOW_INVENTORY:
-			inventory_title = 'Press the key next to an item to use it, or Esc to cancel. \n'
+			inventory_title = 'Press the key next to an item to use it, or Esc to cancel.'
 		else:
-			inventory_title = 'Press the key next to an item to drop it, or Esc to cancel. \n'
+			inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.'
 
 		inventory_menu(con, inventory_title, player.inventory, 50, screen_width, screen_height)
+
+	for entity in entities:
+		if entity.x == mouse.cx and entity.y == mouse.cy:
+			menu(con, entity.name, [entity.description], 50, screen_width, screen_height, list=False)
 
 
 def clear_all(con, entities):

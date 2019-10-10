@@ -196,6 +196,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 				previous_game_state = game_state
 			game_state = GameStates.DROP_INVENTORY
 
+		#Use or drop item in inventory
 		if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(player.inventory.items):
 			item = player.inventory.items[inventory_index]
 			if game_state == GameStates.SHOW_INVENTORY:
@@ -212,7 +213,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 				player_turn_results.extend(item_use_results)
 			
 			elif right_click:
-				player_turn_results.append({'targeting_cancelled': True})
+				player_turn_results.append({'targeting_cancelled': True})		
 						
 		if exit:
 			if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):

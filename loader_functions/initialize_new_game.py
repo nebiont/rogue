@@ -77,7 +77,7 @@ def get_constants():
 def get_game_variables(constants):
 	fighter_component = Fighter(hp=30, defense=2, power=5)
 	inventory_component = Inventory(26)
-	player = Entity(0, 0, 1, libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component)
+	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component)
 	entities = [player]
 
 	game_map = GameMap(constants['map_width'], constants['map_height'])

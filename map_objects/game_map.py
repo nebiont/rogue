@@ -116,12 +116,12 @@ class GameMap:
 					fighter_component = Fighter(hp=10, defense=0, power=3)
 					ai_component = BasicMonster()
 
-					monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+					monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', 'Stinky Orc', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 				else:
 					fighter_component = Fighter(hp=16, defense=1, power=4)
 					ai_component = BasicMonster()
 
-					monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+					monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', 'Stinky Troll', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
 				entities.append(monster)
 
@@ -151,7 +151,7 @@ class GameMap:
 
 				item_component = Item(**args, **kwargs)
 				#item_component = Item(use_function=eval(item_object['args'].get('use_function')), **kwargs)
-				item = Entity(x, y, item_object.get('char'), eval(item_object.get('color')), item_object.get('name'), render_order=eval(item_object.get('render_order')), item=item_component)
+				item = Entity(x, y, item_object.get('char'), eval(item_object.get('color')), item_object.get('name'), item_object.get('description'), render_order=eval(item_object.get('render_order')), item=item_component)
 
 				entities.append(item)
 		  
