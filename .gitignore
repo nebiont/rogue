@@ -5,4 +5,4 @@
 *.pyo
 setup.py
 savegame.*
-.code-workspace
+*.code-workspace
