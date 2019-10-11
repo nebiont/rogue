@@ -51,6 +51,9 @@ class Inventory:
 	def remove_item(self, item):
 		self.items.remove(item)
 
+	def sort_items(self):
+		self.items.sort(key=lambda x: x.name)
+
 	def drop_item(self, item):
 		results = []
 
