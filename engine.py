@@ -45,17 +45,20 @@ def main():
 	key = libtcod.Key()
 	mouse = libtcod.Mouse()
 
-	# Start music
-	mixer.init()
-	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm1.mp3'))
-	#mixer.music.play(loops=-1)
 
+	mixer.init()
+	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
+	mixer.music.play(loops=-1)
 	#Our main loop
 	while not libtcod.console_is_window_closed():
 		# Check for input
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-
+		
+		
+		
 		if show_main_menu:
+			# Start music
+
 			main_menu(con, main_menu_background_image, constants['screen_width'], constants['screen_height'])
 
 			if show_load_error_message:
@@ -120,8 +123,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
 	# Start music
 	mixer.init()
-	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm1.mp3'))
-	#mixer.music.play(loops=-1)
+	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm2.mp3'))
+	mixer.music.play(loops=-1)
 
 	#Our main loop
 	while not libtcod.console_is_window_closed():
@@ -182,10 +185,13 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		drop_inventory = action.get('drop_inventory')
 		inventory_index = action.get('inventory_index')
 		take_stairs = action.get('take_stairs')
+		level_up = action.get('level_up')
+		show_character_screen = action.get('show_character_screen')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
 		left_click = mouse_action.get('left_click')
 		right_click = mouse_action.get('right_click')
+
 
 		#Instatiate our message queue for the players turn
 		player_turn_results = []
@@ -256,6 +262,22 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 			else:
 				message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
 
+		if level_up:
+			if level_up == 'hp':
+				player.fighter.max_hp += 20
+				player.fighter.hp += 20
+			elif level_up == 'str':
+				player.fighter.power += 1
+			elif level_up == 'def':
+				player.fighter.defense += 1
+
+			game_state = previous_game_state
+
+		if show_character_screen:
+			if not game_state == GameStates.CHARACTER_SCREEN:
+				previous_game_state = game_state
+			game_state = GameStates.CHARACTER_SCREEN
+
 		if game_state == GameStates.TARGETING:
 			if left_click:
 				target_x, target_y = left_click
@@ -267,7 +289,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 				player_turn_results.append({'targeting_cancelled': True})		
 						
 		if exit:
-			if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+			if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
 				game_state = previous_game_state
 			elif game_state == GameStates.TARGETING:
 				player_turn_results.append({'targeting_cancelled': True})
@@ -288,6 +310,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 			item_dropped = player_turn_result.get('item_dropped')
 			targeting = player_turn_result.get('targeting')
 			targeting_cancelled = player_turn_result.get('targeting_cancelled')
+			xp = player_turn_result.get('xp')
 
 			if message:
 				message_log.add_message(message)
@@ -324,6 +347,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 			if item_dropped:
 				entities.append(item_dropped)
 				game_state = GameStates.ENEMY_TURN
+
+			if xp:
+				leveled_up = player.level.add_xp(xp)
+				message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
+
+				if leveled_up:
+					message_log.add_message(Message('Your battle skills grow stronger! You reached level {0}'.format(
+													player.level.current_level) + '!', libtcod.yellow))
+					previous_game_state = game_state
+					game_state = GameStates.LEVEL_UP
 
 
 		# Enemy Turn
