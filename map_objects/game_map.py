@@ -10,6 +10,7 @@ from components.fighter import Fighter
 from components.item import Item
 from components.stairs import Stairs
 from item_functions import heal, cast_lightning, cast_fireball, cast_confuse, cast_polymorph
+from random_utils import random_choice_from_dict
 from render_functions import RenderOrder
 import definitions
 import os
@@ -109,11 +110,18 @@ class GameMap:
 		# Get a random number of monsters
 		number_of_monsters = randint(0, max_monsters_per_room)
 		number_of_items = randint(0, max_items_per_room)
+		monster_stream = open(os.path.join(definitions.ROOT_DIR,'data','objects','monsters.yaml'), 'r')
+		monster_list = yaml.load(monster_stream)
+		monster_chances = {}		
+		for i in monster_list:
+			monster_chances[i] = monster_list[i].get('spawn_chance')
 
 		# Load item list so it can be used to generate items
 		item_stream = open(os.path.join(definitions.ROOT_DIR,'data','objects','items.yaml'), 'r')
 		item_list = yaml.load(item_stream)
-		loot_table = []
+		item_chances = {}
+		for i in item_list:
+			item_chances[i] = item_list[i].get('loot_chance')
 
 
 		for i in range(number_of_monsters):
@@ -122,34 +130,34 @@ class GameMap:
 			y = randint(room.y1 + 1, room.y2 - 1)
 
 			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-				if randint(0, 100) < 80:
-					fighter_component = Fighter(hp=10, defense=0, power=3, xp=35)
-					ai_component = BasicMonster()
+				monster_roll = random_choice_from_dict(monster_chances)
+				monster_object = monster_list[monster_roll]
 
-					monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', 'Stinky Orc', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
-				else:
-					fighter_component = Fighter(hp=16, defense=1, power=4, xp=100)
-					ai_component = BasicMonster()
+				fighter_component = Fighter(monster_object.get('hp'), monster_object.get('defense'), monster_object.get('power'), monster_object.get('xp'))
+				ai_component = BasicMonster()
 
-					monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', 'Stinky Troll', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+				monster = Entity(x, y, monster_object.get('char'), eval(monster_object.get('color')), monster_object.get('name'), monster_object.get('description'), blocks=True, render_order=eval(monster_object.get('render_order')), fighter=fighter_component, ai=ai_component)
+
+				# if randint(0, 100) < 80:
+				# 	fighter_component = Fighter(hp=10, defense=0, power=3, xp=35)
+				# 	ai_component = BasicMonster()
+
+				# 	monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', 'Stinky Orc', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+				# else:
+				# 	fighter_component = Fighter(hp=16, defense=1, power=4, xp=100)
+				# 	ai_component = BasicMonster()
+
+				# 	monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', 'Stinky Troll', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
 				entities.append(monster)
-
-		# Generate loot table that we'll use to pick our items from
-		# Iems are distributed in the loot table based on rarity
-		for i in item_list:
-			loot_chance = item_list[i].get('loot_chance')
-			for r in range(loot_chance):
-				loot_table_item = i
-				loot_table.append(loot_table_item)
 
 		for i in range(number_of_items):
 			x = randint(room.x1 + 1, room.x2 - 1)
 			y = randint(room.y1 + 1, room.y2 - 1)
 
 			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-				item_roll = randint(0, len(loot_table) - 1)
-				item_object = item_list[loot_table[item_roll]]
+				item_roll = random_choice_from_dict(item_chances)
+				item_object = item_list[item_roll]
 				args = {}
 				kwargs = {}
 
@@ -160,7 +168,6 @@ class GameMap:
 					kwargs[k] = v
 
 				item_component = Item(**args, **kwargs)
-				#item_component = Item(use_function=eval(item_object['args'].get('use_function')), **kwargs)
 				item = Entity(x, y, item_object.get('char'), eval(item_object.get('color')), item_object.get('name'), item_object.get('description'), render_order=eval(item_object.get('render_order')), item=item_component)
 
 				entities.append(item)
