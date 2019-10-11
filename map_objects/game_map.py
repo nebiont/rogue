@@ -138,17 +138,6 @@ class GameMap:
 
 				monster = Entity(x, y, monster_object.get('char'), eval(monster_object.get('color')), monster_object.get('name'), monster_object.get('description'), blocks=True, render_order=eval(monster_object.get('render_order')), fighter=fighter_component, ai=ai_component)
 
-				# if randint(0, 100) < 80:
-				# 	fighter_component = Fighter(hp=10, defense=0, power=3, xp=35)
-				# 	ai_component = BasicMonster()
-
-				# 	monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', 'Stinky Orc', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
-				# else:
-				# 	fighter_component = Fighter(hp=16, defense=1, power=4, xp=100)
-				# 	ai_component = BasicMonster()
-
-				# 	monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', 'Stinky Troll', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
-
 				entities.append(monster)
 
 		for i in range(number_of_items):
