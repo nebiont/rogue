@@ -1,12 +1,13 @@
 import tcod as libtcod
-from enum import Enum
+from enum import Enum, auto
 from game_states import GameStates
 from menus import inventory_menu, entity_description
 
 class RenderOrder(Enum):
-	CORPSE = 1
-	ITEM = 2
-	ACTOR = 3
+	STAIRS = auto()
+	CORPSE = auto()
+	ITEM = auto()
+	ACTOR = auto()
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
 	bar_width = int(float(value) / maximum * total_width)
@@ -48,7 +49,7 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 	#draw all entities in the list
 	entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
 	for entity in entities_in_render_order:
-		draw_entity(con, entity, fov_map)
+		draw_entity(con, entity, fov_map, game_map)
 
 	libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 	
@@ -70,6 +71,7 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 		y += 1
 
 	render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
+	libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(game_map.dungeon_level))
 	libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
 	if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
@@ -88,8 +90,8 @@ def clear_all(con, entities):
 	for entity in entities:
 		clear_entity(con, entity)
 
-def draw_entity(con, entity, fov_map):
-	if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+def draw_entity(con, entity, fov_map, game_map):
+	if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored):
 		libtcod.console_set_default_foreground(con, entity.color)
 		libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
 

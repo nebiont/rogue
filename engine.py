@@ -8,7 +8,7 @@ from render_functions import clear_all, render_all
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
 from death_functions import kill_monster, kill_player
-from game_messages import Message
+from game_messages import Message, MessageLog
 from pygame import mixer
 import definitions
 import os
@@ -33,7 +33,7 @@ def main():
 	player = None
 	entities = []
 	game_map = None
-	message_log = None
+	message_log: MessageLog  = None
 	game_sate = None
 
 	show_main_menu = True
@@ -181,6 +181,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		show_inventory = action.get('show_inventory')
 		drop_inventory = action.get('drop_inventory')
 		inventory_index = action.get('inventory_index')
+		take_stairs = action.get('take_stairs')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
 		left_click = mouse_action.get('left_click')
@@ -226,6 +227,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		if show_inventory:
 			if game_state != GameStates.SHOW_INVENTORY:
 				previous_game_state = game_state
+			player.inventory.sort_items()
 			game_state = GameStates.SHOW_INVENTORY
 
 		if drop_inventory:
@@ -241,6 +243,18 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
 			elif game_state == GameStates.DROP_INVENTORY:
 				player_turn_results.extend(player.inventory.drop_item(item))
+
+		if take_stairs and game_state == GameStates.PLAYERS_TURN:
+			for entity in entities:
+				if entity.stairs and entity.x == player.x and entity.y == player.y: 
+					entities = game_map.next_floor(player, message_log, constants)
+					fov_map = initialize_fov(game_map)
+					fov_recompute = True
+					libtcod.console_clear(con)
+
+					break
+			else:
+				message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
 
 		if game_state == GameStates.TARGETING:
 			if left_click:
