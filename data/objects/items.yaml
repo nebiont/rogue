@@ -29,7 +29,7 @@
   color: libtcod.red
   render_order: RenderOrder.ITEM
   loot_chance: 8
-  description: Shoots spicey bolts of cracklin' lightning.
+  description: Shoots a ball of fire
   args:
     use_function: cast_fireball
     targeting: "True"
@@ -50,7 +50,7 @@
     targeting: "True"
     targeting_message: Message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
   kwargs:
-    number_of_turns: 10
+    number_of_turns: 5
 
 4:
   name: 'Polymorph Scroll'
