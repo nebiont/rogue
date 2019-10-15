@@ -87,9 +87,46 @@
   char: 'K'
   color: libtcod.light_pink
   render_order: RenderOrder.ACTOR
-  spawn_chance: [[15,2],[30,4],[60,6]]
+  spawn_chance: [[2,2],[20,4],[60,6]]
   description: You can't even tell what this is. It appears to be a giant blob of a pink colored substance that seems to slide it's way towards you. Muffled sounds can be heard coming from within the blobs core. 
-  hp: 40
+  hp: 150
   defense: 5
-  power: 5
+  power: 15
   xp: 150
+
+8:
+  name: 'Sorcerer Devon'
+  char: 'V'
+  color: libtcod.white
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[80, 1]]
+  description: A tall, bald sorcerer wielding the powers of calendar management and meeting charisma.
+  hp: 12
+  defense: 2
+  power: 4
+  xp: 80
+  
+9:
+  name: 'iChan'
+  char: i
+  color: libtcod.white
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[80, 1]]
+  description: The iChan will interrupt your every sentence in order to gather more strength and power.
+  hp: 10
+  defense: 1
+  power: 3
+  xp: 40
+  
+
+10:
+  name: 'DDOS'
+  char: O
+  color: libtcod.blue
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[2,2],[20,4],[60,6]]
+  description: The DDOS seeks out temperature differentials that are above it's specified threshold and attempts to correct them. Watch out for it's thermal monitoring attack!
+  hp: 25
+  defense: 2
+  power: 4
+  xp: 100
