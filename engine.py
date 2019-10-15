@@ -20,7 +20,7 @@ def main():
 	constants = get_constants()
 	
 	# Limit FPS to 100 so we dont kill CPUs
-	libtcod.sys_set_fps(100)
+	libtcod.sys_set_fps(60)
 
 	# Load font and create root console (what you see)
 	libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
@@ -34,7 +34,7 @@ def main():
 	entities = []
 	game_map = None
 	message_log: MessageLog  = None
-	game_sate = None
+	game_state = None
 
 	show_main_menu = True
 	show_load_error_message = False
@@ -48,7 +48,7 @@ def main():
 
 	mixer.init()
 	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
-	mixer.music.play(loops=-1)
+	#mixer.music.play(loops=-1)
 	#Our main loop
 	while not libtcod.console_is_window_closed():
 		# Check for input
@@ -76,7 +76,7 @@ def main():
 			if show_load_error_message and (new_game or load_saved_game or exit_game):
 				show_load_error_message = False
 			elif new_game:
-				player, entities, game_map, message_log, game_sate = get_game_variables(constants)
+				player, entities, game_map, message_log, game_state = get_game_variables(constants)
 				game_state = GameStates.PLAYERS_TURN
 
 				show_main_menu = False
@@ -93,7 +93,7 @@ def main():
 
 		else:
 			libtcod.console_clear(con)
-			play_game(player, entities, game_map, message_log, game_sate, con, panel, constants)
+			play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
 
 			show_main_menu = True
 
@@ -103,6 +103,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 	# Intialize FOV map.
 	fov_recompute = True # Recompute FOV after the player moves
 	fov_map = initialize_fov(game_map)
+	target_fov_map = initialize_fov(game_map)
+	fov_map_no_walls = initialize_fov(game_map)
 
 
 	# Capture keyboard and mouse input
@@ -113,6 +115,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
 	# Store the item that the player used to enter targeting mode (ie lightning scroll). This is so that we know what item we need to remove from inventory etc.
 	targeting_item = None
+	cursor_radius = 1
 
 	# For showing object descriptions
 	description_recompute = True
@@ -124,7 +127,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 	# Start music
 	mixer.init()
 	mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm2.mp3'))
-	mixer.music.play(loops=-1)
+	#mixer.music.play(loops=-1)
 
 	#Our main loop
 	while not libtcod.console_is_window_closed():
@@ -134,6 +137,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		# Recompute FOV
 		if fov_recompute:
 			recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
+			recompute_fov(fov_map_no_walls, player.x, player.y, constants['fov_radius'], light_walls=False, algorithm=constants['fov_algorithm'])
 		
 	
 		# Show object descriptions
@@ -166,7 +170,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
 		
 		# Draw our scene
-		render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], constants['colors'], game_state, description_list, description_index)
+		render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], constants['colors'], game_state, description_list, description_index, cursor_radius, target_fov_map, fov_map_no_walls)
 		fov_recompute = False
 		libtcod.console_flush()
 
@@ -279,20 +283,24 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 			game_state = GameStates.CHARACTER_SCREEN
 
 		if game_state == GameStates.TARGETING:
+			cursor_radius = targeting_item.item.function_kwargs.get('radius')
 			if left_click:
 				target_x, target_y = left_click
-
-				item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map, target_x=target_x, target_y=target_y)
+				
+				item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
 				player_turn_results.extend(item_use_results)
+				cursor_radius = 1
 			
 			elif right_click:
-				player_turn_results.append({'targeting_cancelled': True})		
+				player_turn_results.append({'targeting_cancelled': True})
+				cursor_radius = 1		
 						
 		if exit:
 			if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
 				game_state = previous_game_state
 			elif game_state == GameStates.TARGETING:
 				player_turn_results.append({'targeting_cancelled': True})
+				cursor_radius = 1
 			else:
 				save_game(player, entities, game_map, message_log, game_state)
 				return True

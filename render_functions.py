@@ -2,6 +2,8 @@ import tcod as libtcod
 from enum import Enum, auto
 from game_states import GameStates
 from menus import inventory_menu, entity_description, level_up_menu, character_screen
+from fov_functions import recompute_fov
+import math
 
 class RenderOrder(Enum):
 	STAIRS = auto()
@@ -23,7 +25,8 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 	libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state, description_list, description_index):
+def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state, description_list, description_index, cursor_radius, target_fov_map, fov_map_no_walls):
+
 	# draw all the tiles in the game map
 	if fov_recompute:
 		for y in range(game_map.height):
@@ -42,9 +45,6 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 						libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
 					else:
 						libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)			
-	
-	
-	
 
 	#draw all entities in the list
 	entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
@@ -53,11 +53,7 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 
 	libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 	
-	#draw mouse cursor
-	cursor = libtcod.console_new(1, 1)
-	libtcod.console_set_default_foreground(cursor, libtcod.white)
-	cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
-	libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
+	draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height)
 	
 	#clear info panel
 	libtcod.console_set_default_background(panel, libtcod.black)
@@ -105,3 +101,49 @@ def clear_entity(con, entity):
 	# erase the character that represents this object
 	libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
 
+def draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height):
+	#draw mouse cursor
+	
+	if cursor_radius == 1 or cursor_radius == None:
+		cursor = libtcod.console_new(1, 1)
+		libtcod.console_set_default_foreground(cursor, libtcod.white)
+		cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
+		libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
+	
+	# If we have a radius greater than one then draw a circle with a radius of cursor_radius
+	elif game_state == GameStates.TARGETING:
+		#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
+		cursor = libtcod.console.Console(screen_width + 20, screen_height)
+		libtcod.console_set_default_background(cursor, [245, 245, 245])
+		libtcod.console_set_key_color(cursor, [245, 245, 245])
+		cursor.draw_rect(0,0, screen_width, screen_height,0,bg=[245, 245, 245])
+		recompute_fov(target_fov_map, mouse.cx, mouse.cy, cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
+		for x in range(mouse.cx - cursor_radius, mouse.cx + cursor_radius + 1):
+			for y in range(mouse.cy - cursor_radius, mouse.cy + cursor_radius + 1):
+				if math.sqrt((x - mouse.cx) ** 2 + (y - mouse.cy) ** 2) <= cursor_radius:
+					if not libtcod.map_is_in_fov(fov_map_no_walls, x, y):
+						cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
+					elif libtcod.map_is_in_fov(target_fov_map, x, y):
+						cursor.draw_rect(x,y,1,1,0,bg=libtcod.light_green)
+					else:
+						cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
+		libtcod.console_blit(cursor, 0, 0, 0, 0, 0,0, 0, 0, 0.4)
+		#libtcod.console_blit(cursor, 0, 0, screen_width, screen_height, 0,mouse.cx - cursor_radius, mouse.cy -cursor_radius), 0, 0.4)
+
+	# elif game_state == GameStates.TARGETING:
+	# 	diameter = int((cursor_radius * 2) + 1)
+	# 	cursor = libtcod.console.Console(diameter,diameter)
+	# 	libtcod.console_set_default_background(cursor, [245, 245, 245])
+	# 	libtcod.console_set_key_color(cursor, [245, 245, 245])
+	# 	cursor.draw_rect(0,0, diameter, diameter,0,bg=[245, 245, 245])
+	# 	recompute_fov(target_fov_map, mouse.cx, mouse.cy, cursor_radius)
+	# 	for x in range(diameter):
+	# 		for y in range(diameter):
+	# 			if math.sqrt((x - cursor_radius) ** 2 + (y - cursor_radius) ** 2) <= cursor_radius:
+	# 				if libtcod.map_is_in_fov(target_fov_map, x, y):
+	# 					cursor.draw_rect(x,y,1,1,0,bg=libtcod.light_green)
+	# 				else:
+	# 					cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
+	# 	libtcod.console_blit(cursor, 0, 0, diameter, diameter, 0,mouse.cx - (cursor_radius), mouse.cy -(cursor_radius), 0, 0.4)
+				
+	

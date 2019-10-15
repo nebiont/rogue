@@ -2,6 +2,7 @@ import tcod as libtcod
 
 from game_messages import Message
 from components.ai import ConfusedMonster, PolymorphedMonster
+from fov_functions import recompute_fov
 
 def heal(*args, **kwargs):
     entity = args[0]
@@ -49,10 +50,12 @@ def cast_lightning(*args, **kwargs):
 def cast_fireball(*args, **kwargs):
     entities = kwargs.get('entities')
     fov_map = kwargs.get('fov_map')
+    target_fov_map = kwargs.get('target_fov_map')
     damage = kwargs.get('damage')
     radius = kwargs.get('radius')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
+
 
     results = []
 
@@ -64,8 +67,10 @@ def cast_fireball(*args, **kwargs):
 
     for entity in entities:
         if entity.distance(target_x, target_y) <= radius and entity.fighter:
-            results.append({'message': Message('The {0} gets burned for {1} hit points'.format(entity.name, damage), libtcod.orange)})
-            results.extend(entity.fighter.take_damage(damage))
+            recompute_fov(target_fov_map, target_x, target_y, radius)
+            if libtcod.map_is_in_fov(target_fov_map, entity.x, entity.y):
+                results.append({'message': Message('The {0} gets burned for {1} hit points'.format(entity.name, damage), libtcod.orange)})
+                results.extend(entity.fighter.take_damage(damage))
 
     return results
 
