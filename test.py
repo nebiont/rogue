@@ -2,10 +2,8 @@ import yaml
 import tcod as libtcod
 from random import randint
 
-test = libtcod.Color(255, 255, 0)
-print(test) 
-
-libtcod.white
+test_x = [0,0]
+test_y
 
 # item_stream = open('.\\data\\objects\\items.yaml', 'r')
 # item_list = yaml.load(item_stream)
