@@ -3,7 +3,7 @@
   char: '~'
   color: libtcod.black
   render_order: RenderOrder.ACTOR
-  spawn_chance: 80
+  spawn_chance: [[80, 1]]
   description: A small humanoid creature covered in scraggly moustache hairs. Some believe they were born from the stray moustache hairs of Neo-Don.
   hp: 10
   defense: 0
@@ -15,7 +15,7 @@
   char: 'T'
   color: libtcod.dark_green
   render_order: RenderOrder.ACTOR
-  spawn_chance: 15
+  spawn_chance: [[15,2],[30,4],[60,6]]
   description: A servant worker for the Spice Troll faction. Often found mining spice in the spice mines. They lack intelligence, but can pack a punch.
   hp: 16
   defense: 1
@@ -27,7 +27,7 @@
   char: 'D'
   color: libtcod.pink
   render_order: RenderOrder.ACTOR
-  spawn_chance: 5
+  spawn_chance: [[5,1],[15,2],[30,4],[60,6]]
   description: Wanders the hallways looking for someone to hand out his Twitch business cards to.
   hp: 20
   defense: 2
@@ -35,11 +35,11 @@
   xp: 110
 
 3:
-  name: 'Brant'
+  name: 'Barnticus'
   char: 'B'
   color: libtcod.amber
   render_order: RenderOrder.ACTOR
-  spawn_chance: 8
+  spawn_chance: [[15,2],[30,4],[60,6]]
   description: Legends say he runs a framing crew, but to your eyes all he wants to do is drink coffee, and then drink some more.
   hp: 20
   defense: 2
@@ -51,7 +51,7 @@
   char: 'c'
   color: libtcod.black
   render_order: RenderOrder.ACTOR
-  spawn_chance: 12
+  spawn_chance: [[30,1]]
   description: Un-happy cats that abandoned their own and now roam the halls scavenging for food. Rumor has it that encountering all 3 at once is trouble.
   hp: 7
   defense: 0
@@ -63,7 +63,7 @@
   char: 'N'
   color: libtcod.light_red
   render_order: RenderOrder.ACTOR
-  spawn_chance: 8
+  spawn_chance: [[15,2],[30,4],[60,6]]
   description: A skeleton like humanoid with speed far greater than the average human. 
   hp: 10
   defense: 1
@@ -71,11 +71,11 @@
   xp: 25
 
 6:
-  name: 'Kody Klein'
+  name: 'Ogreklein'
   char: 'K'
   color: libtcod.light_yellow
   render_order: RenderOrder.ACTOR
-  spawn_chance: 16
+  spawn_chance: [[15,2],[30,4],[60,6]]
   description: A large naked ogre, beware of it's naked dance of death.
   hp: 15
   defense: 3
@@ -83,11 +83,11 @@
   xp: 40
 
 7:
-  name: 'Kim Klein'
+  name: 'Mother Klein'
   char: 'K'
   color: libtcod.light_pink
   render_order: RenderOrder.ACTOR
-  spawn_chance: 3
+  spawn_chance: [[15,2],[30,4],[60,6]]
   description: You can't even tell what this is. It appears to be a giant blob of a pink colored substance that seems to slide it's way towards you. Muffled sounds can be heard coming from within the blobs core. 
   hp: 40
   defense: 5
