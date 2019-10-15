@@ -33,3 +33,63 @@
   defense: 2
   power: 4
   xp: 110
+
+3:
+  name: 'Brant'
+  char: 'B'
+  color: libtcod.amber
+  render_order: RenderOrder.ACTOR
+  spawn_chance: 8
+  description: Legends say he runs a framing crew, but to your eyes all he wants to do is drink coffee, and then drink some more.
+  hp: 20
+  defense: 2
+  power: 4
+  xp: 110
+
+4:
+  name: "One of Brett's 3 Cats"
+  char: 'c'
+  color: libtcod.black
+  render_order: RenderOrder.ACTOR
+  spawn_chance: 12
+  description: Un-happy cats that abandoned their own and now roam the halls scavenging for food. Rumor has it that encountering all 3 at once is trouble.
+  hp: 7
+  defense: 0
+  power: 2
+  xp: 10
+
+5:
+  name: 'B-NOS'
+  char: 'N'
+  color: libtcod.light_red
+  render_order: RenderOrder.ACTOR
+  spawn_chance: 8
+  description: A skeleton like humanoid with speed far greater than the average human. 
+  hp: 10
+  defense: 1
+  power: 2
+  xp: 25
+
+6:
+  name: 'Kody Klein'
+  char: 'K'
+  color: libtcod.light_yellow
+  render_order: RenderOrder.ACTOR
+  spawn_chance: 16
+  description: A large naked ogre, beware of it's naked dance of death.
+  hp: 15
+  defense: 3
+  power: 3
+  xp: 40
+
+7:
+  name: 'Kim Klein'
+  char: 'K'
+  color: libtcod.light_pink
+  render_order: RenderOrder.ACTOR
+  spawn_chance: 3
+  description: You can't even tell what this is. It appears to be a giant blob of a pink colored substance that seems to slide it's way towards you. Muffled sounds can be heard coming from within the blobs core. 
+  hp: 40
+  defense: 5
+  power: 5
+  xp: 150
