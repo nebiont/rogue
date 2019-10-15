@@ -110,7 +110,7 @@ def draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_wal
 		cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
 		libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
 	
-	# If we have a radius greater than one then draw a circle with a radius of cursor_radius
+	# If we have a radius greater than one then draw a circle with a radius of cursor_radius. Game state needs to be targetting, this makes it so when we cancel targetting our cursor goes back to normal
 	elif game_state == GameStates.TARGETING:
 		#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
 		cursor = libtcod.console.Console(screen_width + 20, screen_height)
