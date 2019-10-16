@@ -32,7 +32,7 @@ class Inventory:
 		item_component = item_entity.item
 
 		if item_component.use_function is None:
-			equippable_component = item_entity.equippable_component
+			equippable_component = item_entity.equippable
 
 			if equippable_component:
 				results.append({'equip': item_entity})

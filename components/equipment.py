@@ -12,7 +12,7 @@ class Equipment:
 		if self.main_hand and self.main_hand.equippable:
 			bonus += self.main_hand.equippable.max_hp_bonus
 
-		if self.off_hand and self.off_hand.equipabble:
+		if self.off_hand and self.off_hand.equippable:
 			bonus += self.off_hand.equippable.max_hp_bonus
 
 		return bonus
@@ -24,7 +24,7 @@ class Equipment:
 		if self.main_hand and self.main_hand.equippable:
 			bonus += self.main_hand.equippable.power_bonus
 
-		if self.off_hand and self.off_hand.equipabble:
+		if self.off_hand and self.off_hand.equippable:
 			bonus += self.off_hand.equippable.power_bonus
 
 		return bonus
@@ -36,7 +36,7 @@ class Equipment:
 		if self.main_hand and self.main_hand.equippable:
 			bonus += self.main_hand.equippable.defense_bonus
 
-		if self.off_hand and self.off_hand.equipabble:
+		if self.off_hand and self.off_hand.equippable:
 			bonus += self.off_hand.equippable.defense_bonus
 
 		return bonus
@@ -44,7 +44,7 @@ class Equipment:
 	def toggle_equip(self, equippable_entity):
 		results = []
 
-		slot = equippable_entity.equipabble.slot
+		slot = equippable_entity.equippable.slot
 
 		if slot == EquipmentSlots.MAIN_HAND:
 			if self.main_hand == equippable_entity:

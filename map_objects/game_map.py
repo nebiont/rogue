@@ -116,9 +116,9 @@ class GameMap:
 		number_of_items = randint(0, max_items_per_room)
 		monster_stream = open(os.path.join(definitions.ROOT_DIR,'data','objects','monsters.yaml'), 'r')
 		monster_list = yaml.load(monster_stream)
-		monster_chances = {}		
+		monster_chances = []		
 		for i in monster_list:
-			monster_chances[i] = from_dungeon_level(monster_list[i].get('spawn_chance'), self.dungeon_level)
+			monster_chances.append(['monster', from_dungeon_level(monster_list[i].get('spawn_chance'), self.dungeon_level), i])
 
 		# Load item list so it can be used to generate items
 		item_stream = open(os.path.join(definitions.ROOT_DIR,'data','objects','items.yaml'), 'r')
@@ -136,21 +136,21 @@ class GameMap:
 			item_index += 1
 
 
-		# for i in range(number_of_monsters):
-		# 	# Choose a random location in the room
-		# 	x = randint(room.x1 + 1, room.x2 - 1)
-		# 	y = randint(room.y1 + 1, room.y2 - 1)
+		for i in range(number_of_monsters):
+			# Choose a random location in the room
+			x = randint(room.x1 + 1, room.x2 - 1)
+			y = randint(room.y1 + 1, room.y2 - 1)
 
-		# 	if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-		# 		monster_roll = random_choice_from_dict(monster_chances)
-		# 		monster_object = monster_list[monster_roll]
+			if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+				monster_roll = random_choice_from_dict(monster_chances)
+				monster_object = monster_list[monster_roll[2]]
 
-		# 		fighter_component = Fighter(monster_object.get('hp'), monster_object.get('defense'), monster_object.get('power'), monster_object.get('xp'))
-		# 		ai_component = BasicMonster()
+				fighter_component = Fighter(monster_object.get('hp'), monster_object.get('defense'), monster_object.get('power'), monster_object.get('xp'))
+				ai_component = BasicMonster()
 
-		# 		monster = Entity(x, y, monster_object.get('char'), eval(monster_object.get('color')), monster_object.get('name'), monster_object.get('description'), blocks=True, render_order=eval(monster_object.get('render_order')), fighter=fighter_component, ai=ai_component)
+				monster = Entity(x, y, monster_object.get('char'), eval(monster_object.get('color')), monster_object.get('name'), monster_object.get('description'), blocks=True, render_order=eval(monster_object.get('render_order')), fighter=fighter_component, ai=ai_component)
 
-		# 		entities.append(monster)
+				entities.append(monster)
 
 		for i in range(number_of_items):
 			x = randint(room.x1 + 1, room.x2 - 1)
@@ -179,6 +179,15 @@ class GameMap:
 				#
 				#
 				if item_roll[0] == 'equipment':
+					item_object = equipment_list[item_roll[2]]
+					kwargs = {}
+					for k, v in item_object['kwargs'].items():
+							kwargs[k] = v
+
+					equippable_component = Equippable(eval(item_object.get('slot')), **kwargs)
+					item = Entity(x, y, item_object.get('char'), eval(item_object.get('color')), item_object.get('name'), item_object.get('description'), render_order=eval(item_object.get('render_order')), equippable=equippable_component)
+
+					entities.append(item)
 
 		  
 	
