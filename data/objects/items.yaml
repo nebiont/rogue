@@ -3,24 +3,24 @@
   char: '!'
   color: libtcod.violet
   render_order: RenderOrder.ITEM
-  loot_chance: 50
+  loot_chance: [[35,0]]
   description: Heals you with the power of friendship. A friendship which ceases the moment you drink.
   args:
     use_function: heal
   kwargs:
-    amount: 4
+    amount: 40
 
 1:
   name: 'Lightning Scroll'
   char: '#'
   color: libtcod.yellow
   render_order: RenderOrder.ITEM
-  loot_chance: 5
+  loot_chance: [[25,4]]
   description: Shoots spicey bolts of cracklin' lightning.
   args:
     use_function: "cast_lightning"
   kwargs:
-    damage: 20
+    damage: 40
     maximum_range: 5
 
 2:
@@ -28,14 +28,14 @@
   char: '#'
   color: libtcod.red
   render_order: RenderOrder.ITEM
-  loot_chance: 8
+  loot_chance: [[25,6]]
   description: Shoots a ball of fire
   args:
     use_function: cast_fireball
     targeting: "True"
     targeting_message: Message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
   kwargs:
-    damage: 12
+    damage: 25
     radius: 3
 
 3:
@@ -43,7 +43,7 @@
   char: '#'
   color: libtcod.pink
   render_order: RenderOrder.ITEM
-  loot_chance: 5
+  loot_chance: [[10,2]]
   description: The words written on the scroll make no sense to you.
   args:
     use_function: cast_confuse
@@ -57,7 +57,7 @@
   char: '#'
   color: libtcod.light_blue
   render_order: RenderOrder.ITEM
-  loot_chance: 10
+  loot_chance: [[10,2]]
   description: On the scroll is a hastily drawn picture of a sheep.
   args:
     use_function: cast_polymorph

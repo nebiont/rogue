@@ -123,7 +123,7 @@ class GameMap:
 		item_list = yaml.load(item_stream)
 		item_chances = {}
 		for i in item_list:
-			item_chances[i] = item_list[i].get('loot_chance')
+			item_chances[i] = from_dungeon_level(item_list[i].get('loot_chance'), self.dungeon_level)
 
 
 		for i in range(number_of_monsters):

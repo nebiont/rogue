@@ -60,13 +60,13 @@ class Entity:
 
 	def move_astar(self, target, entities, game_map):
 		# Create a FOV map that has the dimensions of the map
-		fov = libtcod.map_new(game_map.width, game_map.height)
+		fov = libtcod.map.Map(game_map.width, game_map.height, order='F')
 		
 		# Scan the current map each turn and set all the walls as unwalkable
 		for y1 in range(game_map.height):
 			for x1 in range(game_map.width):
-				libtcod.map_set_properties(fov, x1, y1, not game_map.tiles[x1][y1].block_sight,
-										not game_map.tiles[x1][y1].blocked)
+				fov.transparent[x1,y1] = not game_map.tiles[x1][y1].block_sight
+				fov.walkable[x1, y1] = not game_map.tiles[x1][y1].blocked
 
 		# Scan all the objects to see if there are objects that must be navigated around
 		# Check also that the object isn't self or the target (so that the start and the end points are free)
@@ -74,7 +74,8 @@ class Entity:
 		for entity in entities:
 			if entity.blocks and entity != self and entity != target:
 				# Set the tile as a wall so it must be navigated around
-				libtcod.map_set_properties(fov, entity.x, entity.y, True, False)
+				fov.transparent[entity.x, entity.y] = True
+				fov.walkable[entity.x, entity.y] = False
 
 		# Allocate a A* path
 		# The 1.41 is the normal diagonal cost of moving, it can be set as 0.0 if diagonal moves are prohibited
