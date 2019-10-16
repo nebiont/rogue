@@ -5,9 +5,9 @@
   render_order: RenderOrder.ACTOR
   spawn_chance: [[80, 1]]
   description: A small humanoid creature covered in scraggly moustache hairs. Some believe they were born from the stray moustache hairs of Neo-Don.
-  hp: 10
+  hp: 20
   defense: 0
-  power: 3
+  power: 4
   xp: 35
 
 1:
@@ -17,9 +17,9 @@
   render_order: RenderOrder.ACTOR
   spawn_chance: [[15,2],[30,4],[60,6]]
   description: A servant worker for the Spice Troll faction. Often found mining spice in the spice mines. They lack intelligence, but can pack a punch.
-  hp: 16
-  defense: 1
-  power: 4
+  hp: 30
+  defense: 2
+  power: 8
   xp: 100
 
 2:
@@ -32,7 +32,7 @@
   hp: 20
   defense: 2
   power: 4
-  xp: 110
+  xp: 75
 
 3:
   name: 'Barnticus'
@@ -41,10 +41,10 @@
   render_order: RenderOrder.ACTOR
   spawn_chance: [[15,2],[30,4],[60,6]]
   description: Legends say he runs a framing crew, but to your eyes all he wants to do is drink coffee, and then drink some more.
-  hp: 20
-  defense: 2
-  power: 4
-  xp: 110
+  hp: 25
+  defense: 1
+  power: 6
+  xp: 75
 
 4:
   name: "One of Brett's 3 Cats"
@@ -53,7 +53,7 @@
   render_order: RenderOrder.ACTOR
   spawn_chance: [[30,1]]
   description: Un-happy cats that abandoned their own and now roam the halls scavenging for food. Rumor has it that encountering all 3 at once is trouble.
-  hp: 7
+  hp: 18
   defense: 0
   power: 2
   xp: 10
@@ -65,9 +65,9 @@
   render_order: RenderOrder.ACTOR
   spawn_chance: [[15,2],[30,4],[60,6]]
   description: A skeleton like humanoid with speed far greater than the average human. 
-  hp: 10
-  defense: 1
-  power: 2
+  hp: 22
+  defense: 3
+  power: 1
   xp: 25
 
 6:

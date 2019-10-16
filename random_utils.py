@@ -20,7 +20,12 @@ def random_choice_index(chances):
         choice +=1
 
 def random_choice_from_dict(choice_dict):
-    choices = list(choice_dict.keys())
-    chances = list(choice_dict.values())
+    choices = []
+    chances = []
+    for i in choice_dict:
+        choices.append(i)
+        chances.append(i[1])
+    # choices = list(choice_dict.keys())
+    # chances = list(choice_dict.values())
 
     return choices[random_choice_index(chances)]

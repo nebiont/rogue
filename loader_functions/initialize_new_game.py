@@ -3,6 +3,7 @@ import tcod as libtcod
 from components.fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
+from components.equipment import Equipment
 
 from entity import Entity
 
@@ -72,10 +73,11 @@ def get_constants():
 	return constants
 
 def get_game_variables(constants):
-	fighter_component = Fighter(hp=40, defense=2, power=5)
+	fighter_component = Fighter(hp=100, defense=1, power=4)
 	inventory_component = Inventory(26)
 	level_component = Level()
-	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component, level=level_component)
+	equipment_component = Equipment()
+	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component)
 	entities = [player]
 
 	game_map = GameMap(constants['map_width'], constants['map_height'])

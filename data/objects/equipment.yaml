@@ -1,0 +1,19 @@
+0:
+  name: 'Weiner Sword'
+  char: '/'
+  color: libtcod.sky
+  render_order: RenderOrder.ITEM
+  loot_chance: [[100,1]]
+  description: A weiner sword.
+  slot: EquipmentSlots.MAIN_HAND
+  power_bonus: 3
+
+1:
+  name: 'Klein Shield'
+  char: '['
+  color: libtcod.darker_orange
+  render_order: RenderOrder.ITEM
+  loot_chance: [[100,1]]
+  description: Klein's keg gut.
+  slot: EquipmentSlots.OFF_HAND
+  defense_bonus: 1
