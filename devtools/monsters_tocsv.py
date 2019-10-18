@@ -1,4 +1,7 @@
 import csv
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import definitions
 import yaml
 import os
@@ -6,7 +9,7 @@ from time import sleep
 
 
 
-yaml_stream = open(os.path.join(definitions.ROOT_DIR,'data','objects','monsters.yaml'), 'r')
+yaml_stream = open(os.path.join(definitions.ROOT_DIR, 'data','objects','monsters.yaml'), 'r')
 yaml_file = yaml.load(yaml_stream)
 header_row = ['ID']
 row = []

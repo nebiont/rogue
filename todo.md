@@ -14,6 +14,7 @@ Mother Kleins should spawn Klein Ogres
 
 Confused should have less chance of hitting themselves
 
+optimize all libtcod calls, remove the deprecated calls
 
 
 BUGS:
