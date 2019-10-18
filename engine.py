@@ -10,6 +10,7 @@ from game_states import GameStates
 from death_functions import kill_monster, kill_player
 from game_messages import Message, MessageLog
 from pygame import mixer
+from random import randint
 import definitions
 import os
 
@@ -268,13 +269,19 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
 		if level_up:
 			if level_up == 'hp':
-				player.fighter.base_max_hp += 20
-				player.fighter.hp += 20
+				player.fighter.con += 1
+				message_log.add_message(Message('Your Constitution has increased by 1!', libtcod.yellow))
 			elif level_up == 'str':
 				player.fighter.base_power += 1
+				message_log.add_message(Message('Your Strength has increased by 1!', libtcod.yellow))
 			elif level_up == 'def':
 				player.fighter.base_defense += 1
+				message_log.add_message(Message('Your Defense has increased by 1!', libtcod.yellow))
 
+			hp_increase = randint(player.fighter.hitdie[0], player.fighter.hitdie[1]) + int((player.fighter.con - 10) / 2)
+			player.fighter.base_max_hp += hp_increase
+			player.fighter.hp += hp_increase
+			message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
 			game_state = previous_game_state
 
 		if show_character_screen:
@@ -379,8 +386,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 				if leveled_up:
 					message_log.add_message(Message('Your battle skills grow stronger! You reached level {0}'.format(
 													player.level.current_level) + '!', libtcod.yellow))
-					previous_game_state = game_state
-					game_state = GameStates.LEVEL_UP
+					if (player.level.current_level % 2) == 0:
+						previous_game_state = game_state
+						game_state = GameStates.LEVEL_UP
+					else:
+						hp_increase = randint(player.fighter.hitdie[0], player.fighter.hitdie[1]) + int((player.fighter.con - 10) / 2)
+						player.fighter.base_max_hp += hp_increase
+						player.fighter.hp += hp_increase
+						message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
 
 
 		# Enemy Turn

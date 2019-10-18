@@ -16,8 +16,10 @@ Confused should have less chance of hitting themselves
 
 optimize all libtcod calls, remove the deprecated calls
 
+Swords dont equip like DnD weaponds do
+
+Make a harder enemy spawn in each stair room?
 
 BUGS:
 
-Fireballs can go through walls
 Fix being able to see descripton of things that arent visible yet

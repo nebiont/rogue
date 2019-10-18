@@ -1,7 +1,7 @@
 import tcod as libtcod
 from enum import Enum, auto
 from game_states import GameStates
-from menus import inventory_menu, entity_description, level_up_menu, character_screen
+from menus import inventory_menu, entity_description, level_up_menu, character_screen, message_box
 from fov_functions import recompute_fov
 import math
 

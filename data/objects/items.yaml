@@ -8,7 +8,7 @@
   args:
     use_function: heal
   kwargs:
-    amount: 40
+    amount: 6
 
 1:
   name: 'Lightning Scroll'

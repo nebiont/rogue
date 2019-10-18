@@ -6,9 +6,9 @@
   spawn_chance: [[80, 1]]
   description: A small humanoid creature covered in scraggly moustache hairs. Some believe they were born from the stray moustache hairs of Neo-Don.
   hp: 7
-  ac: 12
-  str: 2
-  dmg: [1,4]
+  defense: 12
+  power: 12
+  dmg: [1,2]
   xp: 35
 
 1:
