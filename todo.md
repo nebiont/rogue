@@ -16,8 +16,8 @@ Confused should have less chance of hitting themselves
 
 optimize all libtcod calls, remove the deprecated calls
 
+Swords dont equip like DnD weaponds do
 
 BUGS:
 
-Fireballs can go through walls
 Fix being able to see descripton of things that arent visible yet
