@@ -4,12 +4,13 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import definitions
+from collections import OrderedDict
 
 
 
 
 yaml_stream = open(os.path.join(definitions.ROOT_DIR, 'data', 'objects','test.yaml'), 'w', newline="")
-yaml_store = {}
+yaml_store = OrderedDict()
 
 with open('test.csv', mode='r') as csv_file:
 	csv_reader = csv.reader(csv_file, delimiter=',')
@@ -23,7 +24,7 @@ with open('test.csv', mode='r') as csv_file:
 
 		else:
 			x = 1
-			temp = {}
+			temp = OrderedDict()
 			for i in row:
 				parsed = (int(row[0]), row[1], row[2], row[3], row[4],
 							eval(row[5]), row[6], int(row[7]), int(row[8]),

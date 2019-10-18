@@ -14,7 +14,7 @@ yaml_file = yaml.load(yaml_stream)
 header_row = ['ID']
 row = []
 
-for i in yaml_file[0]:
+for i in yaml_file['0']:
     header_row.append(i)
 with open('test.csv', mode='w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
