@@ -1,181 +1,132 @@
-'0':
+0:
+  name: 'Stachebold'
   char: '~'
   color: libtcod.black
-  defense: 0
-  description: A small humanoid creature covered in scraggly moustache hairs. Some
-    believe they were born from the stray moustache hairs of Neo-Don.
-  hp: 20
-  name: Stachebold
-  power: 4
   render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 80
-    - 1
+  spawn_chance: [[80, 1]]
+  description: A small humanoid creature covered in scraggly moustache hairs. Some believe they were born from the stray moustache hairs of Neo-Don.
+  hp: 20
+  defense: 0
+  power: 4
   xp: 35
-'1':
-  char: T
+
+1:
+  name: 'Lesser Spice Troll'
+  char: 'T'
   color: libtcod.dark_green
-  defense: 2
-  description: A servant worker for the Spice Troll faction. Often found mining spice
-    in the spice mines. They lack intelligence, but can pack a punch.
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[15,2],[30,4],[60,6]]
+  description: A servant worker for the Spice Troll faction. Often found mining spice in the spice mines. They lack intelligence, but can pack a punch.
   hp: 30
-  name: Lesser Spice Troll
+  defense: 2
   power: 8
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 15
-    - 2
-  - - 30
-    - 4
-  - - 60
-    - 6
   xp: 100
-'10':
-  char: O
-  color: libtcod.blue
-  defense: 2
-  description: The DDOS seeks out temperature differentials that are above it's specified
-    threshold and attempts to correct them. Watch out for it's thermal monitoring
-    attack!
-  hp: 25
-  name: DDOS
-  power: 4
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 2
-    - 2
-  - - 20
-    - 4
-  - - 60
-    - 6
-  xp: 100
-'2':
-  char: D
+
+2:
+  name: 'Wandering Zellers'
+  char: 'D'
   color: libtcod.pink
-  defense: 2
-  description: Wanders the hallways looking for someone to hand out his Twitch business
-    cards to.
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[5,1],[15,2],[30,4],[60,6]]
+  description: Wanders the hallways looking for someone to hand out his Twitch business cards to.
   hp: 20
-  name: Wandering Zellers
+  defense: 2
   power: 4
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 5
-    - 1
-  - - 15
-    - 2
-  - - 30
-    - 4
-  - - 60
-    - 6
   xp: 75
-'3':
-  char: B
+
+3:
+  name: 'Barnticus'
+  char: 'B'
   color: libtcod.amber
-  defense: 1
-  description: Legends say he runs a framing crew, but to your eyes all he wants to
-    do is drink coffee, and then drink some more.
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[15,2],[30,4],[60,6]]
+  description: Legends say he runs a framing crew, but to your eyes all he wants to do is drink coffee, and then drink some more.
   hp: 25
-  name: Barnticus
+  defense: 1
   power: 6
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 15
-    - 2
-  - - 30
-    - 4
-  - - 60
-    - 6
   xp: 75
-'4':
-  char: c
+
+4:
+  name: "One of Brett's 3 Cats"
+  char: 'c'
   color: libtcod.black
-  defense: 0
-  description: Un-happy cats that abandoned their own and now roam the halls scavenging
-    for food. Rumor has it that encountering all 3 at once is trouble.
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[30,1]]
+  description: Un-happy cats that abandoned their own and now roam the halls scavenging for food. Rumor has it that encountering all 3 at once is trouble.
   hp: 18
-  name: One of Brett's 3 Cats
+  defense: 0
   power: 2
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 30
-    - 1
   xp: 10
-'5':
-  char: N
+
+5:
+  name: 'B-NOS'
+  char: 'N'
   color: libtcod.light_red
-  defense: 3
-  description: A skeleton like humanoid with speed far greater than the average human.
-  hp: 22
-  name: B-NOS
-  power: 1
   render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 15
-    - 2
-  - - 30
-    - 4
-  - - 60
-    - 6
-  xp: 25
-'6':
-  char: K
-  color: libtcod.light_yellow
+  spawn_chance: [[15,2],[30,4],[60,6]]
+  description: A skeleton like humanoid with speed far greater than the average human. 
+  hp: 22
   defense: 3
+  power: 1
+  xp: 25
+
+6:
+  name: 'Ogreklein'
+  char: 'K'
+  color: libtcod.light_yellow
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[15,2],[30,4],[60,6]]
   description: A large naked ogre, beware of it's naked dance of death.
   hp: 15
-  name: Ogreklein
+  defense: 3
   power: 3
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 15
-    - 2
-  - - 30
-    - 4
-  - - 60
-    - 6
   xp: 40
-'7':
-  char: K
+
+7:
+  name: 'Mother Klein'
+  char: 'K'
   color: libtcod.light_pink
-  description: You can't even tell what this is. It appears to be a giant blob of
-    a pink colored substance that seems to slide it's way towards you. Muffled sounds
-    can be heard coming from within the blobs core.
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[2,2],[20,4],[60,6]]
+  description: You can't even tell what this is. It appears to be a giant blob of a pink colored substance that seems to slide it's way towards you. Muffled sounds can be heard coming from within the blobs core. 
   hp: 150
-  name: Mother Klein
-  render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 2
-    - 2
-  - - 20
-    - 4
-  - - 60
-    - 6
-'8':
-  char: V
+  defense: 5
+  power: 15
+  xp: 150
+
+8:
+  name: 'Sorcerer Devon'
+  char: 'V'
   color: libtcod.white
-  defense: 2
-  description: A tall, bald sorcerer wielding the powers of calendar management and
-    meeting charisma.
-  hp: 12
-  name: Sorcerer Devon
-  power: 4
   render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 80
-    - 1
+  spawn_chance: [[80, 1]]
+  description: A tall, bald sorcerer wielding the powers of calendar management and meeting charisma.
+  hp: 12
+  defense: 2
+  power: 4
   xp: 80
-'9':
+  
+9:
+  name: 'iChan'
   char: i
   color: libtcod.white
-  defense: 1
-  description: The iChan will interrupt your every sentence in order to gather more
-    strength and power.
-  hp: 10
-  name: iChan
-  power: 3
   render_order: RenderOrder.ACTOR
-  spawn_chance:
-  - - 80
-    - 1
+  spawn_chance: [[80, 1]]
+  description: The iChan will interrupt your every sentence in order to gather more strength and power.
+  hp: 10
+  defense: 1
+  power: 3
   xp: 40
+  
+
+10:
+  name: 'DDOS'
+  char: O
+  color: libtcod.blue
+  render_order: RenderOrder.ACTOR
+  spawn_chance: [[2,2],[20,4],[60,6]]
+  description: The DDOS seeks out temperature differentials that are above it's specified threshold and attempts to correct them. Watch out for it's thermal monitoring attack!
+  hp: 25
+  defense: 2
+  power: 4
+  xp: 100
