@@ -1,12 +1,1 @@
-ID,name,char,color,render_order,spawn_chance,description,hp,defense,power,xp
-0,Stachebold,~,libtcod.black,RenderOrder.ACTOR,"[[80, 1]]",A small humanoid creature covered in scraggly moustache hairs. Some believe they were born from the stray moustache hairs of Neo-Don.,20,0,4,35
-1,Lesser Spice Troll,T,libtcod.dark_green,RenderOrder.ACTOR,"[[15, 2], [30, 4], [60, 6]]","A servant worker for the Spice Troll faction. Often found mining spice in the spice mines. They lack intelligence, but can pack a punch.",30,2,8,100
-2,Wandering Zellers,D,libtcod.pink,RenderOrder.ACTOR,"[[5, 1], [15, 2], [30, 4], [60, 6]]",Wanders the hallways looking for someone to hand out his Twitch business cards to.,20,2,4,75
-3,Barnticus,B,libtcod.amber,RenderOrder.ACTOR,"[[15, 2], [30, 4], [60, 6]]","Legends say he runs a framing crew, but to your eyes all he wants to do is drink coffee, and then drink some more.",25,1,6,75
-4,One of Brett's 3 Cats,c,libtcod.black,RenderOrder.ACTOR,"[[30, 1]]",Un-happy cats that abandoned their own and now roam the halls scavenging for food. Rumor has it that encountering all 3 at once is trouble.,18,0,2,10
-5,B-NOS,N,libtcod.light_red,RenderOrder.ACTOR,"[[15, 2], [30, 4], [60, 6]]",A skeleton like humanoid with speed far greater than the average human.,22,3,1,25
-6,Ogreklein,K,libtcod.light_yellow,RenderOrder.ACTOR,"[[15, 2], [30, 4], [60, 6]]","A large naked ogre, beware of it's naked dance of death.",15,3,3,40
-7,Mother Klein,K,libtcod.light_pink,RenderOrder.ACTOR,"[[2, 2], [20, 4], [60, 6]]",You can't even tell what this is. It appears to be a giant blob of a pink colored substance that seems to slide it's way towards you. Muffled sounds can be heard coming from within the blobs core.,150,5,15,150
-8,Sorcerer Devon,V,libtcod.white,RenderOrder.ACTOR,"[[80, 1]]","A tall, bald sorcerer wielding the powers of calendar management and meeting charisma.",12,2,4,80
-9,iChan,i,libtcod.white,RenderOrder.ACTOR,"[[80, 1]]",The iChan will interrupt your every sentence in order to gather more strength and power.,10,1,3,40
-10,DDOS,O,libtcod.blue,RenderOrder.ACTOR,"[[2, 2], [20, 4], [60, 6]]",The DDOS seeks out temperature differentials that are above it's specified threshold and attempts to correct them. Watch out for it's thermal monitoring attack!,25,2,4,100
+ID,0

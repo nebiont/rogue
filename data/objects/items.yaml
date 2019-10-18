@@ -1,83 +1,71 @@
-'0':
-  args:
-    use_function: heal
+0:
+  name: 'Healing Potion'
   char: '!'
   color: libtcod.violet
-  description: Heals you with the power of friendship. A friendship which ceases the
-    moment you drink.
+  render_order: RenderOrder.ITEM
+  loot_chance: [[35,0]]
+  description: Heals you with the power of friendship. A friendship which ceases the moment you drink.
+  args:
+    use_function: heal
   kwargs:
     amount: 40
-  loot_chance:
-  - - 600
-    - 0
-  name: Healing Potion
-  render_order: RenderOrder.ITEM
-'1':
-  args:
-    use_function: cast_lightning
+
+1:
+  name: 'Lightning Scroll'
   char: '#'
   color: libtcod.yellow
+  render_order: RenderOrder.ITEM
+  loot_chance: [[25,4]]
   description: Shoots spicey bolts of cracklin' lightning.
+  args:
+    use_function: "cast_lightning"
   kwargs:
     damage: 40
     maximum_range: 5
-  loot_chance:
-  - - 25
-    - 4
-  name: Lightning Scroll
-  render_order: RenderOrder.ITEM
-'2':
-  args:
-    targeting: 'True'
-    targeting_message: Message('Left-click a target tile for the fireball, or right-click
-      to cancel.', libtcod.light_cyan)
-    use_function: cast_fireball
+
+2:
+  name: 'Fireball Scroll'
   char: '#'
   color: libtcod.red
+  render_order: RenderOrder.ITEM
+  loot_chance: [[25,6]]
   description: Shoots a ball of fire
+  args:
+    use_function: cast_fireball
+    targeting: "True"
+    targeting_message: Message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
   kwargs:
     damage: 25
     radius: 3
-  loot_chance:
-  - - 25
-    - 6
-  name: Fireball Scroll
-  render_order: RenderOrder.ITEM
-'3':
-  args:
-    targeting: 'True'
-    targeting_message: Message('Left-click an enemy to confuse it, or right-click
-      to cancel.', libtcod.light_cyan)
-    use_function: cast_confuse
+
+3:
+  name: 'Confuse Scroll'
   char: '#'
   color: libtcod.pink
+  render_order: RenderOrder.ITEM
+  loot_chance: [[10,2]]
   description: The words written on the scroll make no sense to you.
+  args:
+    use_function: cast_confuse
+    targeting: "True"
+    targeting_message: Message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
   kwargs:
     number_of_turns: 5
-  loot_chance:
-  - - 10
-    - 2
-  name: Confuse Scroll
-  render_order: RenderOrder.ITEM
-'4':
-  args:
-    targeting: 'True'
-    targeting_message: Message('Left-click an enemy to polymorph it, or right-click
-      to cancel.', libtcod.white)
-    use_function: cast_polymorph
+
+4:
+  name: 'Polymorph Scroll'
   char: '#'
   color: libtcod.light_blue
+  render_order: RenderOrder.ITEM
+  loot_chance: [[10,2]]
   description: On the scroll is a hastily drawn picture of a sheep.
+  args:
+    use_function: cast_polymorph
+    targeting: "True"
+    targeting_message: Message('Left-click an enemy to polymorph it, or right-click to cancel.', libtcod.white)
   kwargs:
     number_of_turns: 10
-    polymorph_animal: sheep
     polymorph_char: '&'
-    polymorph_color:
-    - 255
-    - 255
-    - 255
-  loot_chance:
-  - - 10
-    - 2
-  name: Polymorph Scroll
-  render_order: RenderOrder.ITEM
+    polymorph_animal: 'sheep'
+    polymorph_color: [255, 255, 255]
+

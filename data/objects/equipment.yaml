@@ -1,24 +1,21 @@
-'0':
-  char: /
+0:
+  name: 'Weiner Sword'
+  char: '/'
   color: libtcod.sky
+  render_order: RenderOrder.ITEM
+  loot_chance: [[100,1]]
   description: The sword of Dildor.
+  slot: EquipmentSlots.MAIN_HAND
   kwargs:
     power_bonus: 3
-  loot_chance:
-  - - 100
-    - 1
-  name: Weiner Sword
-  render_order: RenderOrder.ITEM
-  slot: EquipmentSlots.MAIN_HAND
-'1':
+
+1:
+  name: 'Klein Shield'
   char: '['
   color: libtcod.darker_orange
+  render_order: RenderOrder.ITEM
+  loot_chance: [[100,1]]
   description: Klein's keg gut.
+  slot: EquipmentSlots.OFF_HAND
   kwargs:
     defense_bonus: 1
-  loot_chance:
-  - - 100
-    - 1
-  name: Klein Shield
-  render_order: RenderOrder.ITEM
-  slot: EquipmentSlots.OFF_HAND
