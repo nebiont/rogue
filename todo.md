@@ -18,6 +18,8 @@ optimize all libtcod calls, remove the deprecated calls
 
 Swords dont equip like DnD weaponds do
 
+Make a harder enemy spawn in each stair room?
+
 BUGS:
 
 Fix being able to see descripton of things that arent visible yet
