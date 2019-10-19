@@ -145,7 +145,7 @@ class GameMap:
 				monster_roll = random_choice_from_dict(monster_chances)
 				monster_object = monster_list[monster_roll[2]]
 
-				fighter_component = Fighter(monster_object.get('hp'), monster_object.get('defense'), monster_object.get('power'), monster_object.get('xp'))
+				fighter_component = Fighter(monster_object.get('hp'), monster_object.get('defense'), monster_object.get('power'), monster_object.get('xp'), dmg=monster_object.get('dmg'))
 				ai_component = BasicMonster()
 
 				monster = Entity(x, y, monster_object.get('char'), eval(monster_object.get('color')), monster_object.get('name'), monster_object.get('description'), blocks=True, render_order=eval(monster_object.get('render_order')), fighter=fighter_component, ai=ai_component)
