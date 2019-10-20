@@ -4,6 +4,7 @@ from components.fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
 from components.equipment import Equipment
+from components.role import Warrior
 
 from entity import Entity
 
@@ -77,7 +78,8 @@ def get_game_variables(constants):
 	inventory_component = Inventory(26)
 	level_component = Level()
 	equipment_component = Equipment()
-	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component)
+	role_component = Warrior()
+	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component, role=role_component)
 	entities = [player]
 
 	game_map = GameMap(constants['map_width'], constants['map_height'])

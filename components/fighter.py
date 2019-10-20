@@ -45,6 +45,9 @@ class Fighter:
 
 		return self.base_defense + bonus
 
+	def init_hp(self):
+		self.base_max_hp = self.hitdie[1] + (int((self.con - 10) / 2))
+		self.hp = self.base_max_hp
 
 	def take_damage(self, amount):
 		results = []
