@@ -145,15 +145,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		if description_recompute == True:
 
 			for entity in entities:
-				if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
-					description_list = []
-					description_index = 0
-				if entity.x == mouse.cx and entity.y == mouse.cy:
-					description_list.append(entity)
-					prev_mouse_x = mouse.cx
-					prev_mouse_y = mouse.cy
-		
-				
+				if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+					if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
+						description_list = []
+						description_index = 0
+					if entity.x == mouse.cx and entity.y == mouse.cy:
+						description_list.append(entity)
+						prev_mouse_x = mouse.cx
+						prev_mouse_y = mouse.cy
 
 			
 		if len(description_list) > 0:
