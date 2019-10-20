@@ -25,7 +25,7 @@ def main():
 
 	# Load font and create root console (what you see)
 	libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
-	libtcod.console_init_root(constants['screen_width'], constants['screen_height'], "Brett's Dungeon", False)
+	libtcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False)
 
 	# Create game area and info area, this will be drawn to our root console so that we can see them
 	con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
@@ -260,6 +260,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 				if entity.stairs and entity.x == player.x and entity.y == player.y: 
 					entities = game_map.next_floor(player, message_log, constants)
 					fov_map = initialize_fov(game_map)
+					target_fov_map = initialize_fov(game_map)
+					fov_map_no_walls = initialize_fov(game_map)
 					fov_recompute = True
 					libtcod.console_clear(con)
 

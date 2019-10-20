@@ -118,7 +118,7 @@ def draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_wal
 		libtcod.console_set_key_color(cursor, [245, 245, 245])
 		cursor.draw_rect(0,0, screen_width, screen_height,0,bg=[245, 245, 245])
 
-		#Compute FOV from the cursors perspective. This makes it so walls etc. will block are reticule from showing green
+		#Compute FOV from the cursors perspective. This makes it so walls etc. will block our reticule from showing green
 		recompute_fov(target_fov_map, mouse.cx, mouse.cy, cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
 
 		#Check all coords within the target radius from our cursors
