@@ -81,6 +81,7 @@ def role_menu(con, screen_width, screen_height):
 	names = ['Joe', 'Kyle', 'Brett', 'Devon', 'Kelsey']
 	roles = ['Rageaholic', 'Beastmaster', 'Sense Bender', 'Bald Guy', 'Eldritch Blast']
 	window = libtcod.console.Console(screen_width, screen_height, 'F')
+	text_box = libtcod.console.Console(screen_width, screen_height, 'F')
 	window_width = 80
 	window_height = 55
 
@@ -88,24 +89,25 @@ def role_menu(con, screen_width, screen_height):
 	
 	y = window_height - 7
 	letter_index = ord('a')
-	libtcod.console_set_default_foreground(window, libtcod.white)
 	for name in names:
 		text = '(' + chr(letter_index) + ') '
-		window.print_box(0, y, window_width, 1, text, None, None, libtcod.BKGND_NONE, libtcod.LEFT)
+		text_box.print_box(0, y, window_width, 1, text, None, None, libtcod.BKGND_NONE, libtcod.LEFT)
 		y += 1
 		letter_index += 1
 
 	y = window_height - 7
 	# To center text I need to draw the text to a console first, and then blit it to the window console and center it there. otherwise its impossible to center
 	for name in names:
-		window.print_box(5, y, window_width, 1, name, libtcod.yellow, None, libtcod.BKGND_NONE, libtcod.LEFT)
+		text_box.print_box(4, y, window_width, 1, name, libtcod.yellow, None, libtcod.BKGND_NONE, libtcod.LEFT)
 		y += 1
 		letter_index += 1
 
 	x = int(screen_width / 2 - window_width / 2)
 	y = int(screen_height / 2 - window_height / 2)
 	
+
 	libtcod.console_blit(window, 0, 0, screen_width, screen_height, 0, x, y, 1.0, 1.0)
+	libtcod.console_blit(text_box, 0, 0, screen_width, screen_height, 0, int(screen_width / 2), 0, 1.0, 1.0)
 
 		#     y = header_height
 		# letter_index = ord('a')
