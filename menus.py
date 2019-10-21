@@ -79,7 +79,7 @@ def main_menu(con, background_image, screen_width, screen_height):
 
 def role_menu(con, screen_width, screen_height, role):
 	names = ['Joe', 'Kyle', 'Brett', 'Devon', 'Kelsey']
-	roles = ['Rageaholic', 'Beastmaster', 'Sense Bender', 'Bald Guy', 'Eldritch Blast']
+	roles = ['Rageoholic', 'Beastmaster', 'Sense Bender', 'Bald Bro', 'Eldritch Blast']
 	window = libtcod.console.Console(screen_width, screen_height, 'F')
 	text_box = libtcod.console.Console(screen_width, screen_height, 'F')
 	window_width = 80
@@ -130,24 +130,24 @@ def role_menu(con, screen_width, screen_height, role):
 	libtcod.console_set_color_control(libtcod.COLCTRL_3, libtcod.white, libtcod.black)
 	libtcod.console_set_color_control(libtcod.COLCTRL_4, libtcod.green, libtcod.black)
 	text = '%c..-------~ %c{0} %c~-------..'.format(role.owner.name)%(libtcod.COLCTRL_3, libtcod.COLCTRL_1, libtcod.COLCTRL_3)
-	window.print_box(41, 5, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
+	window.print_box(42, 5, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
 	text = '{0}'.format(role.name)
-	window.print_box(41, 7, 37, 1, text, libtcod.azure, None, libtcod.BKGND_NONE, libtcod.CENTER)
+	window.print_box(42, 7, 37, 1, text, libtcod.azure, None, libtcod.BKGND_NONE, libtcod.CENTER)
 	
 	#Print role description
 	text = '{0}'.format(role.description)
-	description_height = window.get_height_rect(41, 9, 37, window_height, text)
-	window.print_box(41, 9, 37, description_height, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.LEFT)
+	description_height = window.get_height_rect(42, 9, 37, window_height, text)
+	window.print_box(42, 9, 37, description_height, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.LEFT)
 
 	#Print role stats
 	text = '%c.--~ Con: %c{0}%c  Str: %c{1}%c  Def: %c{2}%c ~--.'.format(
 			role.con, role.base_power, role.base_defense)%(libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3)
-	window.print_box(41, description_height + 11, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
+	window.print_box(42, description_height + 11, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
 	
 	dmg = 'd'.join(map(str,role.dmg))
 	hitdie = 'd'.join(map(str,role.hitdie))
 	text = '%c.--~ Dmg: %c{0}%c  HitDie: %c{1}%c ~--.'.format(dmg, hitdie)%(libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3)
-	window.print_box(41, description_height + 13, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
+	window.print_box(42, description_height + 13, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
 
 	
 	#Print role abilities
@@ -175,8 +175,9 @@ def character_screen(player, character_screen_width, screen_width, screen_height
 	options.append('Experience: {0}'.format(player.level.current_xp))
 	options.append('Experience to next Level: {0}'.format(player.level.experience_to_next_level))
 	options.append('Maximum HP: {0}'.format(player.fighter.max_hp))
-	options.append('Attack: {0}'.format(player.fighter.power))
-	options.append('Defense: {0}'.format(player.fighter.defense))
+	options.append('Con: {0}'.format(player.fighter.con))
+	options.append('Str: {0}'.format(player.fighter.power))
+	options.append('Def: {0}'.format(player.fighter.defense))
 
 	menu(0, 'Character Information', options, character_screen_width, screen_width, screen_height, list=False)
 

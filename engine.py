@@ -1,14 +1,15 @@
 import tcod as libtcod
-from input_handlers import handle_keys, handle_mouse, handle_main_menu
-from loader_functions.initialize_new_game import get_constants, get_game_variables
+from input_handlers import handle_keys, handle_mouse, handle_main_menu, handle_role_select
+from loader_functions.initialize_new_game import get_constants, get_game_variables, get_dummy_player
 from loader_functions.data_loaders import load_game, save_game
-from menus import main_menu, message_box
+from menus import main_menu, message_box, role_menu
 from entity import get_blocking_entities_at_location
 from render_functions import clear_all, render_all
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
 from death_functions import kill_monster, kill_player
 from game_messages import Message, MessageLog
+from components.role import Warrior, Ranger, Rogue, Warlock, Paladin
 from pygame import mixer
 from random import randint
 import definitions
@@ -31,13 +32,14 @@ def main():
 	con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
 	panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
 
-	player = None
+	player = get_dummy_player(Warrior())
 	entities = []
 	game_map = None
 	message_log: MessageLog  = None
 	game_state = None
 
 	show_main_menu = True
+	show_game = False
 	show_load_error_message = False
 
 	main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
@@ -76,10 +78,8 @@ def main():
 			if show_load_error_message and (new_game or load_saved_game or exit_game):
 				show_load_error_message = False
 			elif new_game:
-				player, entities, game_map, message_log, game_state = get_game_variables(constants)
-				game_state = GameStates.PLAYERS_TURN
-
 				show_main_menu = False
+				show_game = True
 			
 			elif load_saved_game:
 				try:
@@ -91,13 +91,52 @@ def main():
 			elif exit_game:
 				break
 
+		elif show_game == True:
+			action = handle_role_select(key)
+			warrior = action.get('warrior')
+			ranger = action.get('ranger')
+			rogue = action.get('rogue')
+			paladin = action.get('paladin')
+			warlock = action.get('warlock')
+			back = action.get('exit')
+			accept = action.get('accept')
+			libtcod.console_clear(0)
+			role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+			libtcod.console_flush()
+
+			if warrior:
+				player = get_dummy_player(Warrior())
+				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if ranger:
+				player = get_dummy_player(Ranger())
+				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if rogue:
+				player = get_dummy_player(Rogue())
+				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if paladin:
+				player = get_dummy_player(Paladin())
+				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if warlock:
+				player = get_dummy_player(Warlock())
+				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if accept:
+				show_game = False
+			if back:
+				show_main_menu = True
+
 		else:
 			libtcod.console_clear(con)
+			player, entities, game_map, message_log, game_state = get_game_variables(constants, player)
+			game_state = GameStates.PLAYERS_TURN
 			play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
 
 			show_main_menu = True
 
-		
 
 def play_game(player, entities, game_map, message_log, game_state, con, panel, constants):
 	# Intialize FOV map.

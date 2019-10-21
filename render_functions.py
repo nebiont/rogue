@@ -86,7 +86,7 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 
 	elif len(description_list) > 0:
 		entity_description(con, description_list, description_index, 50, screen_width, screen_height)
-	role_menu(con,screen_width,screen_height, player.role)
+	
 
 
 def clear_all(con, entities):

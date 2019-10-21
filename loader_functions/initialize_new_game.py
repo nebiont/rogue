@@ -4,7 +4,7 @@ from components.fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
 from components.equipment import Equipment
-from components.role import Warrior
+from components.role import Warrior, Rogue, Ranger, Warlock, Paladin
 
 from entity import Entity
 
@@ -73,13 +73,7 @@ def get_constants():
 
 	return constants
 
-def get_game_variables(constants):
-	fighter_component = Fighter(hp=100, defense=12, power=12, hitdie=[1,8], con=11, dmg=[1,6])
-	inventory_component = Inventory(26)
-	level_component = Level()
-	equipment_component = Equipment()
-	role_component = Warrior()
-	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component, role=role_component)
+def get_game_variables(constants, player):
 	entities = [player]
 
 	game_map = GameMap(constants['map_width'], constants['map_height'])
@@ -91,4 +85,13 @@ def get_game_variables(constants):
 
 	return player, entities, game_map, message_log, game_state
 
+def get_dummy_player(role):
+	fighter_component = Fighter(hp=100, defense=12, power=12, hitdie=[1,8], con=11, dmg=[1,6])
+	inventory_component = Inventory(26)
+	level_component = Level()
+	equipment_component = Equipment()
+	role_component = role
+	player = Entity(0, 0, 1, libtcod.white, 'Player', 'Handsome fellow', blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component, inventory=inventory_component, level=level_component, equipment=equipment_component, role=role_component)
+	
+	return player
 

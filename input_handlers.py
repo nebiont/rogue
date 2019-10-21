@@ -133,6 +133,27 @@ def handle_main_menu(key):
 
 	return {}
 
+def handle_role_select(key):
+	if key:
+		key_char = chr(key.c)
+
+		if key_char == 'a':
+			return {'warrior': True}
+		elif key_char == 'b':
+			return {'ranger': True}
+		elif key_char == 'c':
+			return {'rogue': True}
+		elif key_char == 'd':
+			return {'paladin': True}					
+		elif key_char == 'e':
+			return {'warlock': True}
+		elif key.vk == libtcod.KEY_ESCAPE:
+			return {'exit': True}
+		elif key.vk == libtcod.KEY_ENTER:
+			return {'accept': True}
+
+	return {}
+
 def handle_level_up_menu(key):
 	if key:
 		key_char = chr(key.c)
