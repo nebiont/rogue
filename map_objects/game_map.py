@@ -34,6 +34,7 @@ class GameMap:
 		num_rooms = 0
 		center_of_last_room_x = None
 		center_of_last_room_y = None
+		skip = False
 
 		for r in range(max_rooms):
 			# random width and height
@@ -50,7 +51,14 @@ class GameMap:
 			# run through the other rooms and see if they intersect with this one
 			for other_room in rooms:
 				if new_room.intersect(other_room):
-					break
+					chance = randint(1,10)
+					if chance < 8:
+						skip = False
+						break
+					else:
+						skip = True
+
+
 			else:
 				#This means there are no intersections so this room is valid
 				
@@ -67,21 +75,22 @@ class GameMap:
 					player.x = new_x
 					player.y = new_y
 				else:
-					#all rooms after the first:
-					#connect it to the previous room with a tunnel
+					if skip == False:
+						#all rooms after the first:
+						#connect it to the previous room with a tunnel
 
-					#center coordinates of previous room
-					(prev_x, prev_y) = rooms[num_rooms - 1].center()
+						#center coordinates of previous room
+						(prev_x, prev_y) = rooms[num_rooms - 1].center()
 
-					#flip a coin (random number that is either 0 or 1)
-					if randint(0, 1) == 1:
-						#first move horizontally, then vertically
-						self.create_h_tunnel(prev_x, new_x, prev_y)
-						self.create_v_tunnel(prev_y, new_y, new_x)
-					else:
-						#first move vertically, then horizontally
-						self.create_v_tunnel(prev_y, new_y, prev_x)
-						self.create_h_tunnel(prev_x, new_x, new_y)
+						#flip a coin (random number that is either 0 or 1)
+						if randint(0, 1) == 1:
+							#first move horizontally, then vertically
+							self.create_h_tunnel(prev_x, new_x, prev_y)
+							self.create_v_tunnel(prev_y, new_y, new_x)
+						else:
+							#first move vertically, then horizontally
+							self.create_v_tunnel(prev_y, new_y, prev_x)
+							self.create_h_tunnel(prev_x, new_x, new_y)
 				#finally, append the new room to the list
 				self.place_entities(new_room, entities)
 				rooms.append(new_room)
