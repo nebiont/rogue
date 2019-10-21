@@ -1,7 +1,7 @@
 import tcod as libtcod
 from enum import Enum, auto
 from game_states import GameStates
-from menus import inventory_menu, entity_description, level_up_menu, character_screen, message_box
+from menus import inventory_menu, entity_description, level_up_menu, character_screen, message_box, role_menu
 from fov_functions import recompute_fov
 import math
 
@@ -86,6 +86,7 @@ def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recom
 
 	elif len(description_list) > 0:
 		entity_description(con, description_list, description_index, 50, screen_width, screen_height)
+	role_menu(con,screen_width,screen_height)
 
 
 def clear_all(con, entities):
