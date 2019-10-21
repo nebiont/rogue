@@ -77,17 +77,21 @@ def main_menu(con, background_image, screen_width, screen_height):
 		'By Don Carruthers')
 	menu(con, None,['Play a new game', 'Continue last game', 'Quit'], 24, screen_width, screen_height)
 
-def role_menu(con, screen_width, screen_height):
+def role_menu(con, screen_width, screen_height, role):
 	names = ['Joe', 'Kyle', 'Brett', 'Devon', 'Kelsey']
 	roles = ['Rageaholic', 'Beastmaster', 'Sense Bender', 'Bald Guy', 'Eldritch Blast']
 	window = libtcod.console.Console(screen_width, screen_height, 'F')
 	text_box = libtcod.console.Console(screen_width, screen_height, 'F')
 	window_width = 80
 	window_height = 55
+	text_box_width = 4
+	text_box_height = 0
 
 	window.draw_frame(0, 0, window_width, window_height, 'Choose your Class')
 	
-	y = window_height - 7
+	##TODO: can shrink this to one for loop and use color control codes to write a single string with multiple colors. See how I do the stat blocks below.
+	#Print Role name
+	y = window_height - 5
 	letter_index = ord('a')
 	for name in names:
 		text = '(' + chr(letter_index) + ') '
@@ -95,28 +99,67 @@ def role_menu(con, screen_width, screen_height):
 		y += 1
 		letter_index += 1
 
-	y = window_height - 7
-	# To center text I need to draw the text to a console first, and then blit it to the window console and center it there. otherwise its impossible to center
+
+	#Print Role description
+	y = window_height - 5
+	role_index = 0
 	for name in names:
-		text_box.print_box(4, y, window_width, 1, name, libtcod.yellow, None, libtcod.BKGND_NONE, libtcod.LEFT)
+		text = name + ': '
+		text_width = len(text)
+		text_box.print_box(4, y, window_width, 1, text, libtcod.yellow, None, libtcod.BKGND_NONE, libtcod.LEFT)
+		text_box.print_box(4 + text_width, y, window_width, 1, roles[role_index], libtcod.azure, None, libtcod.BKGND_NONE, libtcod.LEFT)
+		if (len(text) + len(roles[role_index])) > text_box_width:
+			text_box_width = len(text) + len(roles[role_index]) + 4
+		role_index += 1
 		y += 1
 		letter_index += 1
+		text_box_height += 1
 
-	x = int(screen_width / 2 - window_width / 2)
-	y = int(screen_height / 2 - window_height / 2)
+
+
+	#Print Select Message
+	text = 'Press a letter to view a class. Press \'Enter\' to select it.'
+	window.print(int(window_width / 2 - len(text) / 2), window_height - 3, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.LEFT)
+
+	#Print role image (images should be 75 x 75 pixels)
+	role.portrait.blit_2x(window, 2,4,0,0)
+
+	#Print role name and description
+	libtcod.console_set_color_control(libtcod.COLCTRL_1, libtcod.yellow, libtcod.black)
+	libtcod.console_set_color_control(libtcod.COLCTRL_2, libtcod.azure, libtcod.black)
+	libtcod.console_set_color_control(libtcod.COLCTRL_3, libtcod.white, libtcod.black)
+	libtcod.console_set_color_control(libtcod.COLCTRL_4, libtcod.green, libtcod.black)
+	text = '%c..-------~ %c{0} %c~-------..'.format(role.owner.name)%(libtcod.COLCTRL_3, libtcod.COLCTRL_1, libtcod.COLCTRL_3)
+	window.print_box(41, 5, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
+	text = '{0}'.format(role.name)
+	window.print_box(41, 7, 37, 1, text, libtcod.azure, None, libtcod.BKGND_NONE, libtcod.CENTER)
 	
+	#Print role description
+	text = '{0}'.format(role.description)
+	description_height = window.get_height_rect(41, 9, 37, window_height, text)
+	window.print_box(41, 9, 37, description_height, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.LEFT)
 
-	libtcod.console_blit(window, 0, 0, screen_width, screen_height, 0, x, y, 1.0, 1.0)
-	libtcod.console_blit(text_box, 0, 0, screen_width, screen_height, 0, int(screen_width / 2), 0, 1.0, 1.0)
+	#Print role stats
+	text = '%c.--~ Con: %c{0}%c  Str: %c{1}%c  Def: %c{2}%c ~--.'.format(
+			role.con, role.base_power, role.base_defense)%(libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3)
+	window.print_box(41, description_height + 11, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
+	
+	dmg = 'd'.join(map(str,role.dmg))
+	hitdie = 'd'.join(map(str,role.hitdie))
+	text = '%c.--~ Dmg: %c{0}%c  HitDie: %c{1}%c ~--.'.format(dmg, hitdie)%(libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3, libtcod.COLCTRL_4, libtcod.COLCTRL_3)
+	window.print_box(41, description_height + 13, 37, 1, text, libtcod.white, None, libtcod.BKGND_NONE, libtcod.CENTER)
 
-		#     y = header_height
-		# letter_index = ord('a')
-		# for options_text in options:
-		#     text = '(' + chr(letter_index) + ') ' + options_text
-		#     text_height = libtcod.console_get_height_rect(con, 0, 0, width, screen_height, text)
-		#     libtcod.console_print_rect_ex(window, 0, y, width, text_height, libtcod.BKGND_NONE, libtcod.LEFT, text)
-		#     y += text_height
-		#     letter_index += 1
+	
+	#Print role abilities
+
+	window_x = int(screen_width / 2 - window_width / 2)
+	window_y = int(screen_height / 2 - window_height / 2)
+	text_box_x = int(screen_width / 2 - text_box_width / 2)
+	text_box_y = int(screen_height / 2 - text_box_height / 2)
+
+
+	libtcod.console_blit(window, 0, 0, screen_width, screen_height, 0, window_x, window_y, 1.0, 1.0)
+	libtcod.console_blit(text_box, 0, 0, screen_width, screen_height, 0, text_box_x, 0, 1.0, 0)
 
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
 	options = ['Constitution (+1 Con, from {0})'.format(player.fighter.con),
