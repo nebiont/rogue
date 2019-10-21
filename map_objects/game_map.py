@@ -53,7 +53,6 @@ class GameMap:
 				if new_room.intersect(other_room):
 					chance = randint(1,10)
 					if chance < 8:
-						skip = False
 						break
 					else:
 						skip = True
@@ -95,6 +94,7 @@ class GameMap:
 				self.place_entities(new_room, entities)
 				rooms.append(new_room)
 				num_rooms += 1
+				skip = False
 
 		stairs_component = Stairs(self.dungeon_level + 1)
 		down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, '>', libtcod.white,
