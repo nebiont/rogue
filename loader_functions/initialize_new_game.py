@@ -19,21 +19,21 @@ from render_functions import RenderOrder
 def get_constants():
 	window_title = "Dans Spicy Calzone"
 
-	screen_width = 80
-	screen_height = 50
+	screen_width = 100
+	screen_height = 65
 
-	bar_width = 20
-	panel_height = 7
+	bar_width = 25
+	panel_height = 9
 	panel_y = screen_height - panel_height
 
 	message_x = bar_width + 2
 	message_width = screen_width - bar_width - 2
 	message_height = panel_height - 1
 
-	map_width = 80
-	map_height = 43
+	map_width = 100
+	map_height = screen_height - panel_height
 
-	room_max_size = 10
+	room_max_size = 12
 	room_min_size = 6
 	max_rooms = 30
 

@@ -67,6 +67,7 @@ def inventory_menu(con, header, inventory, inventory_width, screen_width, screen
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
 def main_menu(con, background_image, screen_width, screen_height):
+    libtcod.image_scale(background_image, screen_width * 2, screen_height * 2)
     libtcod.image_blit_2x(background_image, 0, 0, 0)
 
     libtcod.console_set_default_foreground(0, libtcod.yellow)

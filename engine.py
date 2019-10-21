@@ -58,7 +58,6 @@ def main():
 		
 		
 		if show_main_menu:
-			# Start music
 
 			main_menu(con, main_menu_background_image, constants['screen_width'], constants['screen_height'])
 
