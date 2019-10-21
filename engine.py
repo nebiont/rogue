@@ -125,13 +125,13 @@ def main():
 				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
 				libtcod.console_flush()
 			if accept:
+				player, entities, game_map, message_log, game_state = get_game_variables(constants, player)
 				show_game = False
 			if back:
 				show_main_menu = True
 
 		else:
 			libtcod.console_clear(con)
-			player, entities, game_map, message_log, game_state = get_game_variables(constants, player)
 			game_state = GameStates.PLAYERS_TURN
 			play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
 
@@ -183,14 +183,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		if description_recompute == True:
 
 			for entity in entities:
-				if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
-					if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
-						description_list = []
-						description_index = 0
-					if entity.x == mouse.cx and entity.y == mouse.cy:
-						description_list.append(entity)
-						prev_mouse_x = mouse.cx
-						prev_mouse_y = mouse.cy
+				#if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+				if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
+					description_list = []
+					description_index = 0
+				if entity.x == mouse.cx and entity.y == mouse.cy:
+					description_list.append(entity)
+					prev_mouse_x = mouse.cx
+					prev_mouse_y = mouse.cy
 
 			
 		if len(description_list) > 0:
