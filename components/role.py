@@ -34,7 +34,10 @@ A creature so powerful that nothing can contain its rage. Joe has a large pool o
         self.owner.fighter.hitdie = self.hitdie
         self.owner.name = 'Joe'
         self.owner.fighter.init_hp()
-        self.owner.abilities =self.abilities
+        self.owner.abilities = self.abilities
+        for ability in self.abilities:
+            ability.owner = self.owner
+            
 
 class Rogue(Role):
     name = 'Sense Bender'

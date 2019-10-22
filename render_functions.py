@@ -94,13 +94,13 @@ def clear_all(con, entities):
 		clear_entity(con, entity)
 
 def draw_entity(con, entity, fov_map, game_map):
-	if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.item and game_map.tiles[entity.x][entity.y].explored):
+	if libtcod.map_is_in_fov(fov_map, round(entity.x), round(entity.y)) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.item and game_map.tiles[entity.x][entity.y].explored):
 		libtcod.console_set_default_foreground(con, entity.color)
-		libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
+		libtcod.console_put_char(con, round(entity.x), round(entity.y), entity.char, libtcod.BKGND_NONE)
 
 def clear_entity(con, entity):
 	# erase the character that represents this object
-	libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
+	libtcod.console_put_char(con, round(entity.x), round(entity.y), ' ', libtcod.BKGND_NONE)
 
 def draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height):
 	
