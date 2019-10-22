@@ -57,6 +57,9 @@ def handle_player_turn_keys(key):
 	elif key_char == 'c':
 		return {'show_character_screen': True}
 
+	elif key_char == '1':
+		return {'ability_1': True}
+
 	elif key.vk == libtcod.KEY_ENTER:
 		return {'take_stairs': True}
 						

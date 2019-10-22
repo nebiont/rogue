@@ -229,10 +229,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		take_stairs = action.get('take_stairs')
 		level_up = action.get('level_up')
 		show_character_screen = action.get('show_character_screen')
+		ability_1 = action.get('ability_1')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
 		left_click = mouse_action.get('left_click')
 		right_click = mouse_action.get('right_click')
+		
 
 
 		#Instatiate our message queue for the players turn
@@ -271,6 +273,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 					break
 			else:
 				message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
+
+		if ability_1:
+			player_turn_results.extend(player.abilities[0].use())
 
 		if show_inventory:
 			if game_state != GameStates.SHOW_INVENTORY:
@@ -396,8 +401,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 				game_state = GameStates.TARGETING
 
 				targeting_item = targeting
-
-				message_log.add_message(targeting_item.item.targeting_message)
+				if hasattr(targeting_item, 'item'):
+					message_log.add_message(targeting_item.item.targeting_message)
+				else:
+					message_log.add_message(targeting_item.targeting_message)
 
 			if item_dropped:
 				entities.append(item_dropped)

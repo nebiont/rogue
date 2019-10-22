@@ -1,6 +1,9 @@
 import tcod as libtcod
 import os
 import definitions
+from ability_functions import tackle
+from .ability import Ability
+from game_messages import Message
 
 class Role:
     name = ''
@@ -20,6 +23,8 @@ A creature so powerful that nothing can contain its rage. Joe has a large pool o
     base_power = 14
     dmg = [1,8]
     hitdie = [1,10]
+    tackle = Ability('Tackle', description = None, ability_function=tackle, targeting=True, targeting_message=Message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan))
+    abilities = [tackle]
 
     def role_init(self):
         self.owner.fighter.con = self.con
@@ -29,6 +34,7 @@ A creature so powerful that nothing can contain its rage. Joe has a large pool o
         self.owner.fighter.hitdie = self.hitdie
         self.owner.name = 'Joe'
         self.owner.fighter.init_hp()
+        self.owner.abilities =self.abilities
 
 class Rogue(Role):
     name = 'Sense Bender'
