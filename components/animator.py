@@ -24,19 +24,19 @@ class Animator:
                 if self.x == None and self.y == None:
                     self.x = self.owner.x
                     self.y = self.owner.y
-                    
+
                 final_delta_x = self.delta_x * (libtcod.sys_get_last_frame_length() / self.time)
                 final_delta_y = self.delta_y * (libtcod.sys_get_last_frame_length() / self.time)
                 self.x += final_delta_x
                 self.y += final_delta_y
-                self.owner.x += round(self.x)
-                self.owner.y += round(self.y)
+                self.owner.x = round(self.x)
+                self.owner.y = round(self.y)
                 self.delta_x -= final_delta_x
                 self.delta_y -= final_delta_y
                 self.time -= libtcod.sys_get_last_frame_length()
 
     #speed is tiles / second
-    def move(self, target_x, target_y, speed):
+    def move_to(self, target_x, target_y, speed):
         self.anim_type = 'move'
         self.delta_x = target_x - self.owner.x
         self.delta_y = target_y - self.owner.y

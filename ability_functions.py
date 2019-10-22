@@ -7,10 +7,10 @@ def tackle(*args, **kwargs):
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
     entities = kwargs.get('entities')
-    caster.animator.move(target_x, target_y, 30)
+    caster.animator.move_to(target_x, target_y, 30)
     results = []
     for entity in entities:
-        if entity.x == target_x and entity.y == target_y and hasattr(entity, 'fighter'):
+        if entity.x == target_x and entity.y == target_y and not entity.fighter == None:
             results.append({'message': Message('{0} charges towards the {1}!'.format(caster.name, entity.name), libtcod.green)})
             return results
     else:    
