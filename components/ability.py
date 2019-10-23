@@ -20,11 +20,17 @@ class Ability:
         if self.ability_function is None:
                 results.append({'message': Message('The {0} cannot be used'.format(self.name), libtcod.yellow)})
         else:
+            if kwargs.get('complete'):
+                ability_use_results = self.ability_function(self.owner, self, **kwargs)
+
+                results.extend(ability_use_results)
+                return results
+            
             if self.targeting and not (kwargs.get('target_x') or kwargs.get('target_y')):
                 results.append({'targeting': self})
             else:
                 kwargs = {**self.function_kwargs, **kwargs}
-                ability_use_results = self.ability_function(self.owner, **kwargs)
+                ability_use_results = self.ability_function(self.owner, self, **kwargs)
 
                 results.extend(ability_use_results)
 

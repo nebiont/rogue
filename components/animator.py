@@ -12,6 +12,8 @@ class Animator:
         self.x = None
         self.y = None
         self.time = None
+        self.caller = None
+        self.complete = None
         Animator.animators.append(self)
     
     def update(self):
@@ -24,6 +26,7 @@ class Animator:
                 self.time = None
                 self.x = None
                 self.y = None
+                self.complete = True
                 Animator.blocking -= 1
                 return None
             if self.anim_type == 'move':
@@ -45,7 +48,8 @@ class Animator:
                 self.time -= libtcod.sys_get_last_frame_length()
 
     #speed is tiles / second
-    def move_to(self, target_x, target_y, speed, blocking=False):
+    def move_to(self, target_x, target_y, speed, caller, blocking=False):
+        self.caller = caller
         #If this is a blocking animation we add 1 to Animator.blocking and then read it in the game loop 
         #so that we can set the gamestate to blocking. We use an int rather than a bool so that we can keep track of how many
         #animators are blocking. We only unblock the game state when all blocking animators are done.

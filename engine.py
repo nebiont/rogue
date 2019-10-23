@@ -19,6 +19,7 @@ import os
 #TODO: make main and renderer their own classes, should allow easier passing of info also set me up to do screen shake animations
 
 
+
 def main():
 	#define main variables
 	constants = get_constants()
@@ -176,8 +177,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 		for animator in Animator.animators:
 			animator.update()
-		if Animator.blocking > 0 and not game_s:
-			previous_game_state = game_state
+		if Animator.blocking > 0:
+			if not game_state == GameStates.BLOCKING_ANIMATION:
+				previous_game_state = game_state
+			game_state = GameStates.BLOCKING_ANIMATION
+
+		if Animator.blocking == 0 and game_state == GameStates.BLOCKING_ANIMATION:
+				game_state = previous_game_state
+
 		# Recompute FOV
 		if fov_recompute:
 			recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
@@ -278,9 +285,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 					break
 			else:
 				message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
+		#Ability complete checks:
+		for ability in player.abilities:
+			if player.animator.caller == ability and player.animator.complete:
+				player_turn_results.extend(ability.use(complete=True))
+				player.animator.caller = None
+				player.animator.complete = None
 
 		if ability_1:
 			player_turn_results.extend(player.abilities[0].use())
+
 
 		if show_inventory:
 			if game_state != GameStates.SHOW_INVENTORY:
@@ -381,6 +395,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 			equip = player_turn_result.get('equip')
 			targeting = player_turn_result.get('targeting')
 			targeting_cancelled = player_turn_result.get('targeting_cancelled')
+			ability_used = player_turn_result.get("ability_used")
 			xp = player_turn_result.get('xp')
 
 			if message:
@@ -416,6 +431,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 					message_log.add_message(targeting_item.item.targeting_message)
 				else:
 					message_log.add_message(targeting_item.targeting_message)
+
+			if ability_used:
+				if Animator.blocking == 0:
+					game_state = GameStates.ENEMY_TURN
 
 			if item_dropped:
 				entities.append(item_dropped)
