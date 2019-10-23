@@ -361,9 +361,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 			if left_click:
 				target_x, target_y = left_click
 				if hasattr(targeting_item, 'item'):
-					item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+					item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
 				else:
-					item_use_results = targeting_item.use(entities=entities, fov_map=fov_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+					item_use_results = targeting_item.use(entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
 				player_turn_results.extend(item_use_results)
 				cursor_radius = 1
 			
