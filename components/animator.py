@@ -1,6 +1,6 @@
 import tcod as libtcod
 
-
+#TODO: Handle allowing the animator to set engine.fov_recompute = True to allow some animations to update the player FOV.
 class Animator:
     animators = []
     blocking = 0
