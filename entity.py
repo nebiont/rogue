@@ -2,7 +2,7 @@ import tcod as libtcod
 import math
 from render_functions import RenderOrder
 from components.item import Item
-
+#TODO: Make entities list a class attribute in the Entity class
 
 class Entity:
 	"""

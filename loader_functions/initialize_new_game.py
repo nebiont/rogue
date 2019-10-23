@@ -76,7 +76,6 @@ def get_constants():
 
 def get_game_variables(constants, player):
 	entities = [player]
-	animators = [player.animator]
 
 	game_map = GameMap(constants['map_width'], constants['map_height'])
 	game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
@@ -85,7 +84,7 @@ def get_game_variables(constants, player):
 	message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 	game_state = GameStates.PLAYERS_TURN
 
-	return player, entities, animators, game_map, message_log, game_state
+	return player, entities, game_map, message_log, game_state
 
 def get_dummy_player(role):
 	fighter_component = Fighter(hp=100, defense=12, power=12, hitdie=[1,8], con=11, dmg=[1,6])

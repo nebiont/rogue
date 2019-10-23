@@ -1,4 +1,5 @@
 import tcod as libtcod
+from components.animator import Animator
 from input_handlers import handle_keys, handle_mouse, handle_main_menu, handle_role_select
 from loader_functions.initialize_new_game import get_constants, get_game_variables, get_dummy_player
 from loader_functions.data_loaders import load_game, save_game
@@ -14,7 +15,8 @@ from pygame import mixer
 from random import randint
 import definitions
 import os
-
+#TODO: implement mouse controls, im already halfway their with the tackle animation
+#TODO: make main and renderer their own classes, should allow easier passing of info also set me up to do screen shake animations
 
 
 def main():
@@ -34,7 +36,6 @@ def main():
 
 	player = get_dummy_player(Warrior())
 	entities = []
-	animators = []
 	game_map = None
 	message_log: MessageLog  = None
 	game_state = None
@@ -84,7 +85,7 @@ def main():
 			
 			elif load_saved_game:
 				try:
-					player, entities, animators, game_map, message_log, game_state = load_game()
+					player, entities, game_map, message_log, game_state = load_game()
 					show_main_menu = False
 				except FileNotFoundError:
 					show_load_error_message = True
@@ -126,7 +127,7 @@ def main():
 				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
 				libtcod.console_flush()
 			if accept:
-				player, entities, animators, game_map, message_log, game_state = get_game_variables(constants, player)
+				player, entities, game_map, message_log, game_state = get_game_variables(constants, player)
 				show_game = False
 			if back:
 				show_main_menu = True
@@ -134,12 +135,12 @@ def main():
 		else:
 			libtcod.console_clear(con)
 			game_state = GameStates.PLAYERS_TURN
-			play_game(player, entities, animators, game_map, message_log, game_state, con, panel, constants)
+			play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
 
 			show_main_menu = True
 
 
-def play_game(player, entities, animators, game_map, message_log, game_state, con, panel, constants):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, constants):
 	# Intialize FOV map.
 	fov_recompute = True # Recompute FOV after the player moves
 	fov_map = initialize_fov(game_map)
@@ -173,8 +174,10 @@ def play_game(player, entities, animators, game_map, message_log, game_state, co
 	while not libtcod.console_is_window_closed():
 		# Check for input
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-		for animator in animators:
+		for animator in Animator.animators:
 			animator.update()
+		if Animator.blocking > 0 and not game_s:
+			previous_game_state = game_state
 		# Recompute FOV
 		if fov_recompute:
 			recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
@@ -185,7 +188,7 @@ def play_game(player, entities, animators, game_map, message_log, game_state, co
 		if description_recompute == True:
 
 			for entity in entities:
-				#if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+
 				if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
 					description_list = []
 					description_index = 0
@@ -361,7 +364,7 @@ def play_game(player, entities, animators, game_map, message_log, game_state, co
 				player_turn_results.append({'targeting_cancelled': True})
 				cursor_radius = 1
 			else:
-				save_game(player, entities, animators, game_map, message_log, game_state)
+				save_game(player, entities, game_map, message_log, game_state)
 				return True
 
 
