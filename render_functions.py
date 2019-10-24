@@ -3,9 +3,7 @@ from enum import Enum, auto
 from game_states import GameStates
 from menus import inventory_menu, entity_description, level_up_menu, character_screen, message_box, role_menu
 from fov_functions import recompute_fov
-from loader_functions.initialize_new_game import get_constants
 import math
-import engine
 import os
 import definitions
 from event_manager import *
@@ -35,6 +33,14 @@ class Renderer:
 		self.isinitialized = False
 		self.screen = None
 		
+	def state_control(self, state):
+		switcher = {
+			GameStates.MAIN_MENU: None,
+			GameStates.PLAY_GAME: self.render_all
+		}
+		func = switcher.get(state)
+		if not func == None:
+			func()
 	
 	def notify(self, event):
 		"""
@@ -49,14 +55,14 @@ class Renderer:
 			#TODO: add quit function from libtcod
 			#pygame.quit()
 		elif isinstance(event, TickEvent):
-			self.renderall()
+			self.state_control(self.engine.state.peek())
 
 	def initialize(self):
 		"""
 		Set up the pygame graphical display and loads graphical resources.
 		"""
 		#Get game engine.constants
-		self.constants = get_constants()
+		self.constants = self.engine.constants
 
 		#Get colors
 		self.colors = self.constants['colors']
@@ -69,7 +75,7 @@ class Renderer:
 		libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
 		self.isinitialized = True	
 	
-	def renderall(self):
+	def render_all(self):
 		"""
 		Draw the current game state on screen.
 		Does nothing if isinitialized == False (pygame.init failed)
@@ -78,71 +84,68 @@ class Renderer:
 		if not self.isinitialized:
 			return
 				# draw all the tiles in the game map
-		self.clear_all(engine.con, engine.entities)
-		if engine.fov_recompute:
-			for y in range(engine.game_map.height):
-				for x in range(engine.game_map.width):
-					visible = libtcod.map_is_in_fov(engine.fov_map, x, y)
-					wall = engine.game_map.tiles[x][y].block_sight
+		self.clear_all(self.engine.con, self.engine.entities)
+		if self.engine.fov_recompute:
+			for y in range(self.engine.game_map.height):
+				for x in range(self.engine.game_map.width):
+					visible = libtcod.map_is_in_fov(self.engine.fov_map, x, y)
+					wall = self.engine.game_map.tiles[x][y].block_sight
 
 					if visible:
 						if wall:
-							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('light_wall'), libtcod.BKGND_SET)
+							libtcod.console_set_char_background(self.engine.con, x, y, self.colors.get('light_wall'), libtcod.BKGND_SET)
 						else:
-							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('light_ground'), libtcod.BKGND_SET)
-						engine.game_map.tiles[x][y].explored = True
-					elif engine.game_map.tiles[x][y].explored:
+							libtcod.console_set_char_background(self.engine.con, x, y, self.colors.get('light_ground'), libtcod.BKGND_SET)
+						self.engine.game_map.tiles[x][y].explored = True
+					elif self.engine.game_map.tiles[x][y].explored:
 						if wall:
-							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('dark_wall'), libtcod.BKGND_SET)
+							libtcod.console_set_char_background(self.engine.con, x, y, self.colors.get('dark_wall'), libtcod.BKGND_SET)
 						else:
-							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('dark_ground'), libtcod.BKGND_SET)			
+							libtcod.console_set_char_background(self.engine.con, x, y, self.colors.get('dark_ground'), libtcod.BKGND_SET)			
 
 		#draw all entities in the list
-		entities_in_render_order = sorted(engine.entities, key=lambda x: x.render_order.value)
+		entities_in_render_order = sorted(self.engine.entities, key=lambda x: x.render_order.value)
 		for entity in entities_in_render_order:
-			self.draw_entity(engine.con, entity, engine.fov_map, engine.game_map)
+			self.draw_entity(self.engine.con, entity, self.engine.fov_map, self.engine.game_map)
 
-		libtcod.console_blit(engine.con, 0, 0, self.constants['screen_width'], self.constants['screen_height'], 0, 0, 0)
+		libtcod.console_blit(self.engine.con, 0, 0, self.constants['screen_width'], self.constants['screen_height'], 0, 0, 0)
 		
-		self.draw_cursor(engine.mouse, engine.cursor_radius, engine.game_state, engine.target_fov_map, engine.fov_map_no_walls, engine.screen_width, engine.screen_height)
+		#TODO: handle when there is no cursor
+		#self.draw_cursor(self.engine.mouse, self.engine.cursor_radius, self.engine.game_state, self.engine.target_fov_map, self.engine.fov_map_no_walls, self.engine.screen_width, self.engine.screen_height)
 		
 		#clear info panel
-		libtcod.console_set_default_background(engine.panel, libtcod.black)
-		libtcod.console_clear(engine.panel)
+		libtcod.console_set_default_background(self.engine.panel, libtcod.black)
+		libtcod.console_clear(self.engine.panel)
 
 		# Print the game messages, one line at a time
 		y = 1
-		for message in engine.message_log.messages:
-			libtcod.console_set_default_foreground(engine.panel, message.color)
-			libtcod.console_print_ex(engine.panel, engine.message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
+		for message in self.engine.message_log.messages:
+			libtcod.console_set_default_foreground(self.engine.panel, message.color)
+			libtcod.console_print_ex(self.engine.panel, self.engine.message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
 			y += 1
 
-		self.render_bar(engine.panel, 1, 1, self.constants['bar_width'], 'HP', engine.player.fighter.hp, engine.player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
-		libtcod.console_print_ex(engine.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(engine.game_map.dungeon_level))
-		libtcod.console_blit(engine.panel, 0, 0, self.constants['screen_width'], self.constants['panel_height'], 0, 0, self.constants['panel_y'])
+		self.render_bar(self.engine.panel, 1, 1, self.constants['bar_width'], 'HP', self.engine.player.fighter.hp, self.engine.player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
+		libtcod.console_print_ex(self.engine.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(self.engine.game_map.dungeon_level))
+		libtcod.console_blit(self.engine.panel, 0, 0, self.constants['screen_width'], self.constants['panel_height'], 0, 0, self.constants['panel_y'])
 
-		if engine.game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
-			if engine.game_state == GameStates.SHOW_INVENTORY:
+		if self.engine.game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+			if self.engine.game_state == GameStates.SHOW_INVENTORY:
 				inventory_title = 'Press the key next to an item to use it, or Esc to cancel.'
 			else:
 				inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.'
 
-			inventory_menu(engine.con, inventory_title, engine.player.inventory, 50, self.constants['screen_width'], self.constants['screen_height'])
+			inventory_menu(self.engine.con, inventory_title, self.engine.player.inventory, 50, self.constants['screen_width'], self.constants['screen_height'])
 
-		elif engine.game_state == GameStates.LEVEL_UP:
-			level_up_menu(engine.con, 'Level up! Choose a stat to raise:', engine.player, 40, self.constants['screen_width'], self.constants['screen_height'])
+		elif self.engine.game_state == GameStates.LEVEL_UP:
+			level_up_menu(self.engine.con, 'Level up! Choose a stat to raise:', self.engine.player, 40, self.constants['screen_width'], self.constants['screen_height'])
 
-		elif engine.game_state == GameStates.CHARACTER_SCREEN:
-			character_screen(engine.player, 30, self.constants['screen_width'], self.constants['screen_height'])
+		elif self.engine.game_state == GameStates.CHARACTER_SCREEN:
+			character_screen(self.engine.player, 30, self.constants['screen_width'], self.constants['screen_height'])
 
-		elif len(engine.description_list) > 0:
-			entity_description(engine.con, engine.description_list, engine.description_index, 50, self.constants['screen_width'], self.constants['screen_height'])
+		elif len(self.engine.description_list) > 0:
+			entity_description(self.engine.con, self.engine.description_list, self.engine.description_index, 50, self.constants['screen_width'], self.constants['screen_height'])
 		
 		
-
-
-
-
 
 	def clear_all(self, con, entities):
 		for entity in entities:

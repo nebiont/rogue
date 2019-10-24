@@ -11,3 +11,5 @@ class GameStates(Enum):
     LEVEL_UP = auto()
     CHARACTER_SCREEN = auto()
     BLOCKING_ANIMATION = auto()
+    MAIN_MENU = auto()
+    PLAY_GAME = auto()

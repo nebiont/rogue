@@ -5,7 +5,6 @@ from loader_functions.initialize_new_game import get_constants, get_game_variabl
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box, role_menu
 from entity import get_blocking_entities_at_location
-from render_functions import clear_all, render_all
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
 from death_functions import kill_monster, kill_player
@@ -16,160 +15,180 @@ from random import randint
 from event_manager import *
 import definitions
 import os
+from time import sleep
 #TODO: implement mouse controls, im already halfway their with the tackle animation
 #TODO: make main and renderer their own classes, should allow easier passing of info also set me up to do screen shake animations
 
 
 class GameEngine:
 
-		def __init__(self, evmanager):
-			"""
-			evmanager (EventManager): Allows posting messages to the event queue.
-			
-			Attributes:
-			running (bool): True while the engine is online. Changed via QuitEvent().
-			"""
-			
-			self.evmanager = evmanager
-			evmanager.RegisterListener(self)
-			self.running = False
-
-		def notify(self, event):
-			"""
-			Called by an event in the message queue. 
-			"""
-
-			if isinstance(event, QuitEvent):
-				self.running = False
-
-		def run(self):
-			"""
-			Starts the game engine loop.
-
-			This pumps a Tick event into the message queue for each loop.
-			The loop ends when this object hears a QuitEvent in notify(). 
-			"""
-			self.running = True
-			self.evmanager.Post(InitializeEvent())
-			while self.running:
-				newTick = TickEvent()
-				self.evmanager.Post(newTick)
-
-	def main(self):
-		#define main variables
-		constants = get_constants()
+	def __init__(self, evmanager):
+		"""
+		evmanager (EventManager): Allows posting messages to the event queue.
 		
+		Attributes:
+		running (bool): True while the engine is online. Changed via QuitEvent().
+		"""
+		
+		self.evmanager = evmanager
+		evmanager.RegisterListener(self)
+		self.state = StateMachine()
+		self.running = False
 
+				#define main variables
+		self.constants = get_constants()
+		
 		# Create game area and info area, this will be drawn to our root console so that we can see them
-		con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
-		panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
+		self.con = libtcod.console_new(self.constants['screen_width'], self.constants['screen_height'])
+		self.panel = libtcod.console_new(self.constants['screen_width'], self.constants['panel_height'])
 
-		player = get_dummy_player(Warrior())
-		entities = []
-		game_map = None
-		message_log: MessageLog  = None
-		game_state = None
+		self.player = get_dummy_player(Warrior())
+		self.entities = []
+		self.game_map = None
+		self.message_log: MessageLog  = None
+		self.game_state = None
 
-		show_main_menu = True
-		show_game = False
-		show_load_error_message = False
+		self.show_main_menu = True
+		self.show_game = False
+		self.show_load_error_message = False
 
-		main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
+		self.main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
 
 		# Capture keyboard and mouse input
-		key = libtcod.Key()
-		mouse = libtcod.Mouse()
+		self.key = libtcod.Key()
+		self.mouse = libtcod.Mouse()
 
+		self.fov_recompute = None
+		self.fov_map = None
+		self.target_fov_map = None
+		self.fov_map_no_walls = None
 
 		mixer.init()
+
+	def state_control(self, state):
+		switcher = {
+			GameStates.MAIN_MENU: self.main_menu,
+			GameStates.PLAY_GAME: self.play_game
+		}
+		func = switcher.get(state)
+		func()
+
+	def notify(self, event):
+		"""
+		Called by an event in the message queue. 
+		"""
+
+		if isinstance(event, QuitEvent):
+			self.running = False
+
+		if isinstance(event, StateChangeEvent):
+			# pop request
+			if not event.state:
+				# false if no more states are left
+				if not self.state.pop():
+					self.evManager.Post(QuitEvent())
+			else:
+				# push a new state on the stack
+				self.state.push(event.state)
+
+	def run(self):
+		"""
+		Starts the game engine loop.
+
+		This pumps a Tick event into the message queue for each loop.
+		The loop ends when this object hears a QuitEvent in notify(). 
+		"""
+		self.running = True
+		self.evmanager.Post(InitializeEvent())
+		self.state.push(GameStates.MAIN_MENU)
+		while self.running:
+			self.state_control(self.state.peek())
+			newTick = TickEvent()
+			self.evmanager.Post(newTick)
+			
+
+
+	def main_menu(self):
 		mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
 		#mixer.music.play(loops=-1)
-		#Our main loop
-		while not libtcod.console_is_window_closed():
-			# Check for input
-			libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-			
-			
-			
-			if show_main_menu:
+		# Check for input
+		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, self.key, self.mouse)
+		
+		if self.show_main_menu:
 
-				main_menu(con, main_menu_background_image, constants['screen_width'], constants['screen_height'])
+			main_menu(self.con, self.main_menu_background_image, self.constants['screen_width'], self.constants['screen_height'])
 
-				if show_load_error_message:
-					message_box(con, 'No save game to load', 50, constants['screen_width'], constants['screen_height'])
+			if self.show_load_error_message:
+				message_box(self.con, 'No save game to load', 50, self.constants['screen_width'], self.constants['screen_height'])
 
+			libtcod.console_flush()
+
+			
+			action = handle_main_menu(self.key)
+
+			new_game = action.get('new_game')
+			load_saved_game = action.get('load_game')
+			exit_game = action.get('exit')
+
+			if self.show_load_error_message and (new_game or load_saved_game or exit_game):
+				self.show_load_error_message = False
+			elif new_game:
+				self.show_main_menu = False
+				self.show_game = True
+			
+			elif load_saved_game:
+				try:
+					self.player, self.entities, self.game_map, self.message_log, self.game_state = load_game()
+					self.show_main_menu = False
+				except FileNotFoundError:
+					self.show_load_error_message = True
+
+		elif self.show_game == True:
+			action = handle_role_select(self.key)
+			warrior = action.get('warrior')
+			ranger = action.get('ranger')
+			rogue = action.get('rogue')
+			paladin = action.get('paladin')
+			warlock = action.get('warlock')
+			back = action.get('exit')
+			accept = action.get('accept')
+			libtcod.console_clear(0)
+			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
+			libtcod.console_flush()
+
+			if warrior:
+				player = get_dummy_player(Warrior())
+				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
 				libtcod.console_flush()
-
-				
-				action = handle_main_menu(key)
-
-				new_game = action.get('new_game')
-				load_saved_game = action.get('load_game')
-				exit_game = action.get('exit')
-
-				if show_load_error_message and (new_game or load_saved_game or exit_game):
-					show_load_error_message = False
-				elif new_game:
-					show_main_menu = False
-					show_game = True
-				
-				elif load_saved_game:
-					try:
-						player, entities, game_map, message_log, game_state = load_game()
-						show_main_menu = False
-					except FileNotFoundError:
-						show_load_error_message = True
-				
-				elif exit_game:
-					break
-
-			elif show_game == True:
-				action = handle_role_select(key)
-				warrior = action.get('warrior')
-				ranger = action.get('ranger')
-				rogue = action.get('rogue')
-				paladin = action.get('paladin')
-				warlock = action.get('warlock')
-				back = action.get('exit')
-				accept = action.get('accept')
-				libtcod.console_clear(0)
-				role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
+			if ranger:
+				player = get_dummy_player(Ranger())
+				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
 				libtcod.console_flush()
-
-				if warrior:
-					player = get_dummy_player(Warrior())
-					role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
-					libtcod.console_flush()
-				if ranger:
-					player = get_dummy_player(Ranger())
-					role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
-					libtcod.console_flush()
-				if rogue:
-					player = get_dummy_player(Rogue())
-					role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
-					libtcod.console_flush()
-				if paladin:
-					player = get_dummy_player(Paladin())
-					role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
-					libtcod.console_flush()
-				if warlock:
-					player = get_dummy_player(Warlock())
-					role_menu(con,constants['screen_width'],constants['screen_height'], player.role)
-					libtcod.console_flush()
-				if accept:
-					player, entities, game_map, message_log, game_state = get_game_variables(constants, player)
-					show_game = False
-				if back:
-					show_main_menu = True
-
-			else:
-				libtcod.console_clear(con)
-				game_state = GameStates.PLAYERS_TURN
-				self.play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
-
+			if rogue:
+				player = get_dummy_player(Rogue())
+				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if paladin:
+				player = get_dummy_player(Paladin())
+				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if warlock:
+				player = get_dummy_player(Warlock())
+				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
+				libtcod.console_flush()
+			if accept:
+				self.player, self.entities, self.game_map, self.message_log, self.game_state = get_game_variables(self.constants, self.player)
+				show_game = False
+			if back:
 				show_main_menu = True
 
+		else:
+			libtcod.console_clear(self.con)
+			game_state = GameStates.PLAYERS_TURN
+			self.play_game(self.player, self.entities, self.game_map, self.message_log, self.game_state, self.con, self.panel, self.constants)
 
+			show_main_menu = True
+		
 	def play_game(self, player, entities, game_map, message_log, game_state, con, panel, constants):
 		# Intialize FOV map.
 		fov_recompute = True # Recompute FOV after the player moves
@@ -531,6 +550,43 @@ class GameEngine:
 
 					game_state = GameStates.PLAYERS_TURN
 
-	if __name__ == '__main__':
-		self.main()
-
+class StateMachine(object):
+	"""
+	Manages a stack based state machine.
+	peek(), pop() and push() perform as traditionally expected.
+	peeking and popping an empty stack returns None.
+	"""
+	
+	def __init__ (self):
+		self.statestack = []
+	
+	def peek(self):
+		"""
+		Returns the current state without altering the stack.
+		Returns None if the stack is empty.
+		"""
+		try:
+			return self.statestack[-1]
+		except IndexError:
+			# empty stack
+			return None
+	
+	def pop(self):
+		"""
+		Returns the current state and remove it from the stack.
+		Returns None if the stack is empty.
+		"""
+		try:
+			self.statestack.pop()
+			return len(self.statestack) > 0
+		except IndexError:
+			# empty stack
+			return None
+	
+	def push(self, state):
+		"""
+		Push a new state onto the stack.
+		Returns the pushed value.
+		"""
+		self.statestack.append(state)
+		return state
