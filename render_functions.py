@@ -3,138 +3,206 @@ from enum import Enum, auto
 from game_states import GameStates
 from menus import inventory_menu, entity_description, level_up_menu, character_screen, message_box, role_menu
 from fov_functions import recompute_fov
+from loader_functions.initialize_new_game import get_constants
 import math
+import engine
+import os
+import definitions
+from event_manager import *
 
 class RenderOrder(Enum):
 	STAIRS = auto()
 	CORPSE = auto()
 	ITEM = auto()
 	ACTOR = auto()
+class Renderer:
 
-def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
-	bar_width = int(float(value) / maximum * total_width)
-
-	libtcod.console_set_default_background(panel, back_color)
-	libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
-
-	libtcod.console_set_default_background(panel, bar_color)
-	if bar_width > 0:
-		libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
-
-	libtcod.console_set_default_foreground(panel, libtcod.white)
-	libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
-
-
-def render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width, panel_height, panel_y, colors, game_state, description_list, description_index, cursor_radius, target_fov_map, fov_map_no_walls):
-
-	# draw all the tiles in the game map
-	if fov_recompute:
-		for y in range(game_map.height):
-			for x in range(game_map.width):
-				visible = libtcod.map_is_in_fov(fov_map, x, y)
-				wall = game_map.tiles[x][y].block_sight
-
-				if visible:
-					if wall:
-						libtcod.console_set_char_background(con, x, y, colors.get('light_wall'), libtcod.BKGND_SET)
-					else:
-						libtcod.console_set_char_background(con, x, y, colors.get('light_ground'), libtcod.BKGND_SET)
-					game_map.tiles[x][y].explored = True
-				elif game_map.tiles[x][y].explored:
-					if wall:
-						libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
-					else:
-						libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)			
-
-	#draw all entities in the list
-	entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
-	for entity in entities_in_render_order:
-		draw_entity(con, entity, fov_map, game_map)
-
-	libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
+	def __init__(self, evmanager, game_engine):
+		"""
+		evmanager (EventManager): Allows posting messages to the event queue.
+		model (GameEngine): a strong reference to the game Model.
+				
+		Attributes:
+		isinitialized (bool): pygame is ready to draw.
+		screen (pygame.Surface): the screen surface.
+		clock (pygame.time.Clock): keeps the fps constant.
+		smallfont (pygame.Font): a small font.
+		"""
+		
+		self.evmanager = evmanager
+		evmanager.RegisterListener(self)
+		self.engine = game_engine
+		self.isinitialized = False
+		self.screen = None
+		
 	
-	draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height)
+	def notify(self, event):
+		"""
+		Receive events posted to the message queue. 
+		"""
+
+		if isinstance(event, InitializeEvent):
+			self.initialize()
+		elif isinstance(event, QuitEvent):
+			# shut down the pygame graphics
+			self.isinitialized = False
+			#TODO: add quit function from libtcod
+			#pygame.quit()
+		elif isinstance(event, TickEvent):
+			self.renderall()
+
+	def initialize(self):
+		"""
+		Set up the pygame graphical display and loads graphical resources.
+		"""
+		#Get game engine.constants
+		self.constants = get_constants()
+
+		#Get colors
+		self.colors = self.constants['colors']
+
+		# Limit FPS to 100 so we dont kill CPUs
+		libtcod.sys_set_fps(60)
+
+		# Load font and create root console (what you see)
+		libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+		libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
+		self.isinitialized = True	
 	
-	#clear info panel
-	libtcod.console_set_default_background(panel, libtcod.black)
-	libtcod.console_clear(panel)
+	def renderall(self):
+		"""
+		Draw the current game state on screen.
+		Does nothing if isinitialized == False (pygame.init failed)
+		"""
+		
+		if not self.isinitialized:
+			return
+				# draw all the tiles in the game map
+		self.clear_all(engine.con, engine.entities)
+		if engine.fov_recompute:
+			for y in range(engine.game_map.height):
+				for x in range(engine.game_map.width):
+					visible = libtcod.map_is_in_fov(engine.fov_map, x, y)
+					wall = engine.game_map.tiles[x][y].block_sight
 
-	# Print the game messages, one line at a time
-	y = 1
-	for message in message_log.messages:
-		libtcod.console_set_default_foreground(panel, message.color)
-		libtcod.console_print_ex(panel, message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
-		y += 1
+					if visible:
+						if wall:
+							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('light_wall'), libtcod.BKGND_SET)
+						else:
+							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('light_ground'), libtcod.BKGND_SET)
+						engine.game_map.tiles[x][y].explored = True
+					elif engine.game_map.tiles[x][y].explored:
+						if wall:
+							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('dark_wall'), libtcod.BKGND_SET)
+						else:
+							libtcod.console_set_char_background(engine.con, x, y, self.colors.get('dark_ground'), libtcod.BKGND_SET)			
 
-	render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
-	libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(game_map.dungeon_level))
-	libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
+		#draw all entities in the list
+		entities_in_render_order = sorted(engine.entities, key=lambda x: x.render_order.value)
+		for entity in entities_in_render_order:
+			self.draw_entity(engine.con, entity, engine.fov_map, engine.game_map)
 
-	if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
-		if game_state == GameStates.SHOW_INVENTORY:
-			inventory_title = 'Press the key next to an item to use it, or Esc to cancel.'
-		else:
-			inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.'
+		libtcod.console_blit(engine.con, 0, 0, self.constants['screen_width'], self.constants['screen_height'], 0, 0, 0)
+		
+		self.draw_cursor(engine.mouse, engine.cursor_radius, engine.game_state, engine.target_fov_map, engine.fov_map_no_walls, engine.screen_width, engine.screen_height)
+		
+		#clear info panel
+		libtcod.console_set_default_background(engine.panel, libtcod.black)
+		libtcod.console_clear(engine.panel)
 
-		inventory_menu(con, inventory_title, player.inventory, 50, screen_width, screen_height)
+		# Print the game messages, one line at a time
+		y = 1
+		for message in engine.message_log.messages:
+			libtcod.console_set_default_foreground(engine.panel, message.color)
+			libtcod.console_print_ex(engine.panel, engine.message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
+			y += 1
 
-	elif game_state == GameStates.LEVEL_UP:
-		level_up_menu(con, 'Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
+		self.render_bar(engine.panel, 1, 1, self.constants['bar_width'], 'HP', engine.player.fighter.hp, engine.player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
+		libtcod.console_print_ex(engine.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(engine.game_map.dungeon_level))
+		libtcod.console_blit(engine.panel, 0, 0, self.constants['screen_width'], self.constants['panel_height'], 0, 0, self.constants['panel_y'])
 
-	elif game_state == GameStates.CHARACTER_SCREEN:
-		character_screen(player, 30, screen_width, screen_height)
+		if engine.game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+			if engine.game_state == GameStates.SHOW_INVENTORY:
+				inventory_title = 'Press the key next to an item to use it, or Esc to cancel.'
+			else:
+				inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.'
 
-	elif len(description_list) > 0:
-		entity_description(con, description_list, description_index, 50, screen_width, screen_height)
-	
+			inventory_menu(engine.con, inventory_title, engine.player.inventory, 50, self.constants['screen_width'], self.constants['screen_height'])
+
+		elif engine.game_state == GameStates.LEVEL_UP:
+			level_up_menu(engine.con, 'Level up! Choose a stat to raise:', engine.player, 40, self.constants['screen_width'], self.constants['screen_height'])
+
+		elif engine.game_state == GameStates.CHARACTER_SCREEN:
+			character_screen(engine.player, 30, self.constants['screen_width'], self.constants['screen_height'])
+
+		elif len(engine.description_list) > 0:
+			entity_description(engine.con, engine.description_list, engine.description_index, 50, self.constants['screen_width'], self.constants['screen_height'])
+		
+		
 
 
-def clear_all(con, entities):
-	for entity in entities:
-		clear_entity(con, entity)
 
-def draw_entity(con, entity, fov_map, game_map):
-	if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.item and game_map.tiles[entity.x][entity.y].explored):
-		libtcod.console_set_default_foreground(con, entity.color)
-		libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
 
-def clear_entity(con, entity):
-	# erase the character that represents this object
-	libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
 
-def draw_cursor(mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height):
-	
-	#Checks to see that the item we are using has no radius so that we dont waste time computing a target reticule
-	if cursor_radius == 1 or cursor_radius == None:
-		cursor = libtcod.console_new(1, 1)
-		libtcod.console_set_default_foreground(cursor, libtcod.white)
-		cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
-		libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
-	
-	# If we have a radius greater than one then draw a circle with a radius of cursor_radius. Game state needs to be targetting, this makes it so when we cancel targetting our cursor goes back to normal
-	elif game_state == GameStates.TARGETING:
-		#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
-		cursor = libtcod.console.Console(screen_width + 20, screen_height)
-		libtcod.console_set_default_background(cursor, [245, 245, 245])
-		libtcod.console_set_key_color(cursor, [245, 245, 245])
-		cursor.draw_rect(0,0, screen_width, screen_height,0,bg=[245, 245, 245])
+	def clear_all(self, con, entities):
+		for entity in entities:
+			self.clear_entity(con, entity)
 
-		#Compute FOV from the cursors perspective. This makes it so walls etc. will block our reticule from showing green
-		recompute_fov(target_fov_map, mouse.cx, mouse.cy, cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
+	def render_bar(self, panel, x, y, total_width, name, value, maximum, bar_color, back_color):
+		bar_width = int(float(value) / maximum * total_width)
 
-		#Check all coords within the target radius from our cursors
-		for x in range(mouse.cx - cursor_radius, mouse.cx + cursor_radius + 1):
-			for y in range(mouse.cy - cursor_radius, mouse.cy + cursor_radius + 1):
-				if math.sqrt((x - mouse.cx) ** 2 + (y - mouse.cy) ** 2) <= cursor_radius:
-					#This FOV is computer from the player perspective, but with walls not lighting. This makes it so that if our cursors is on a wall the reticule will be red.
-					if not libtcod.map_is_in_fov(fov_map_no_walls, x, y):
-						cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
-					#Check FOV of the cursors so that walls will block our reticule. If coordinate is in FOV we color it green.
-					elif libtcod.map_is_in_fov(target_fov_map, x, y):
-						cursor.draw_rect(x,y,1,1,0,bg=libtcod.light_green)
-					else:
-						cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
-		libtcod.console_blit(cursor, 0, 0, 0, 0, 0,0, 0, 0, 0.4)
+		libtcod.console_set_default_background(panel, back_color)
+		libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+
+		libtcod.console_set_default_background(panel, bar_color)
+		if bar_width > 0:
+			libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+
+		libtcod.console_set_default_foreground(panel, libtcod.white)
+		libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
+
+	def draw_entity(self, con, entity, fov_map, game_map):
+		if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.item and game_map.tiles[entity.x][entity.y].explored):
+			libtcod.console_set_default_foreground(con, entity.color)
+			libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
+
+	def clear_entity(self, con, entity):
+		# erase the character that represents this object
+		libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
+
+	def draw_cursor(self, mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height):
+		
+		#Checks to see that the item we are using has no radius so that we dont waste time computing a target reticule
+		if cursor_radius == 1 or cursor_radius == None:
+			cursor = libtcod.console_new(1, 1)
+			libtcod.console_set_default_foreground(cursor, libtcod.white)
+			cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
+			libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
+		
+		# If we have a radius greater than one then draw a circle with a radius of cursor_radius. Game state needs to be targetting, this makes it so when we cancel targetting our cursor goes back to normal
+		elif game_state == GameStates.TARGETING:
+			#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
+			cursor = libtcod.console.Console(screen_width + 20, screen_height)
+			libtcod.console_set_default_background(cursor, [245, 245, 245])
+			libtcod.console_set_key_color(cursor, [245, 245, 245])
+			cursor.draw_rect(0,0, screen_width, screen_height,0,bg=[245, 245, 245])
+
+			#Compute FOV from the cursors perspective. This makes it so walls etc. will block our reticule from showing green
+			recompute_fov(target_fov_map, mouse.cx, mouse.cy, cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
+
+			#Check all coords within the target radius from our cursors
+			for x in range(mouse.cx - cursor_radius, mouse.cx + cursor_radius + 1):
+				for y in range(mouse.cy - cursor_radius, mouse.cy + cursor_radius + 1):
+					if math.sqrt((x - mouse.cx) ** 2 + (y - mouse.cy) ** 2) <= cursor_radius:
+						#This FOV is computer from the player perspective, but with walls not lighting. This makes it so that if our cursors is on a wall the reticule will be red.
+						if not libtcod.map_is_in_fov(fov_map_no_walls, x, y):
+							cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
+						#Check FOV of the cursors so that walls will block our reticule. If coordinate is in FOV we color it green.
+						elif libtcod.map_is_in_fov(target_fov_map, x, y):
+							cursor.draw_rect(x,y,1,1,0,bg=libtcod.light_green)
+						else:
+							cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
+			libtcod.console_blit(cursor, 0, 0, 0, 0, 0,0, 0, 0, 0.4)
 
 				
 	
