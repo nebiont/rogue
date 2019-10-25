@@ -64,6 +64,10 @@ class GameEngine:
 		self.fov_map_no_walls = None
 
 		mixer.init()
+		mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
+		mixer.music.set_volume(0.05)
+		#mixer.music.play(loops=-1)
+		
 
 	def state_control(self, state):
 		switcher = {
@@ -109,8 +113,7 @@ class GameEngine:
 
 
 	def main_menu(self):
-		mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
-		#mixer.music.play(loops=-1)
+
 		# Check for input
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, self.key, self.mouse)
 		
@@ -143,7 +146,7 @@ class GameEngine:
 				except FileNotFoundError:
 					self.show_load_error_message = True
 
-		elif self.show_game == True:
+		elif self.show_game:
 			action = handle_role_select(self.key)
 			warrior = action.get('warrior')
 			ranger = action.get('ranger')
@@ -178,16 +181,15 @@ class GameEngine:
 				libtcod.console_flush()
 			if accept:
 				self.player, self.entities, self.game_map, self.message_log, self.game_state = get_game_variables(self.constants, self.player)
-				show_game = False
+				self.show_game = False
 			if back:
-				show_main_menu = True
+				self.show_main_menu = True
 
 		else:
 			libtcod.console_clear(self.con)
-			game_state = GameStates.PLAYERS_TURN
-			self.play_game(self.player, self.entities, self.game_map, self.message_log, self.game_state, self.con, self.panel, self.constants)
+			self.state.push(GameStates.PLAY_GAME)
 
-			show_main_menu = True
+			self.show_main_menu = True
 		
 	def play_game(self, player, entities, game_map, message_log, game_state, con, panel, constants):
 		# Intialize FOV map.
@@ -196,10 +198,7 @@ class GameEngine:
 		target_fov_map = initialize_fov(game_map)
 		fov_map_no_walls = initialize_fov(game_map)
 
-
-		# Capture keyboard and mouse input
-		key = libtcod.Key()
-		mouse = libtcod.Mouse()
+-
 		game_state = GameStates.PLAYERS_TURN
 		previous_game_state = game_state
 
@@ -213,11 +212,6 @@ class GameEngine:
 		description_index = 0	
 		prev_mouse_y = None
 		prev_mouse_x = None
-
-		# Start music
-		mixer.init()
-		mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'bgm2.mp3'))
-		#mixer.music.play(loops=-1)
 
 		#Our main loop
 		while not libtcod.console_is_window_closed():
