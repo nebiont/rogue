@@ -34,13 +34,23 @@ class InputEvent(Event):
 	Keyboard or mouse input event.
 	"""
 	
-	def __init__(self, unicodechar, clickpos):
+	def __init__(self, action, clickpos=None):
 		self.name = "Input event"
-		self.char = unicodechar
+		self.action = action
 		self.clickpos = clickpos
 	def __str__(self):
 		return '%s, char=%s, clickpos=%s' % (self.name, self.char, self.clickpos)
 
+class Mouse_motion_event(Event):
+	"""
+	Mouse movement event
+	"""
+
+	def __init__(self, mousemotion_event):
+		self.name = 'Mouse Coordinates'
+		self.mouse_event = Mouse_motion_event
+	def __str__(self):
+		return '%s, mouse_event=%s' % (self.name, self.mouse_event)
 
 class StateChangeEvent(Event):
     """

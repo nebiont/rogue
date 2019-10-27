@@ -72,7 +72,11 @@ class GameEngine:
 	def state_control(self, state):
 		switcher = {
 			GameStates.MAIN_MENU: self.main_menu,
-			GameStates.PLAY_GAME: self.play_game
+			GameStates.PLAY_GAME: self.play_game,
+			GameStates.PLAYERS_TURN: self.player_turn,
+			GameStates.BLOCKING_ANIMATION: self.blocking_animation_update,
+			GameStates.ENEMY_TURN: self.enemy_turn,
+			GameStates.SHOW_INVENTORY: self.inventory
 		}
 		func = switcher.get(state)
 		func()
@@ -90,7 +94,7 @@ class GameEngine:
 			if not event.state:
 				# false if no more states are left
 				if not self.state.pop():
-					self.evManager.Post(QuitEvent())
+					self.evmanager.Post(QuitEvent())
 			else:
 				# push a new state on the stack
 				self.state.push(event.state)
@@ -113,7 +117,7 @@ class GameEngine:
 
 
 	def main_menu(self):
-
+		#TODO: Separate a bunch of this stuff to the render_function
 		# Check for input
 		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, self.key, self.mouse)
 		
@@ -191,358 +195,357 @@ class GameEngine:
 
 			self.show_main_menu = True
 		
-	def play_game(self, player, entities, game_map, message_log, game_state, con, panel, constants):
+	def play_game(self):
 		# Intialize FOV map.
-		fov_recompute = True # Recompute FOV after the player moves
-		fov_map = initialize_fov(game_map)
-		target_fov_map = initialize_fov(game_map)
-		fov_map_no_walls = initialize_fov(game_map)
-
--
-		game_state = GameStates.PLAYERS_TURN
-		previous_game_state = game_state
+		self.fov_recompute = True # Recompute FOV after the player moves
+		self.fov_map = initialize_fov(self.game_map)
+		self.target_fov_map = initialize_fov(self.game_map)
+		self.fov_map_no_walls = initialize_fov(self.game_map)
 
 		# Store the item that the player used to enter targeting mode (ie lightning scroll). This is so that we know what item we need to remove from inventory etc.
-		targeting_item = None
-		cursor_radius = 1
+		self.targeting_item = None
+		self.cursor_radius = 1
 
 		# For showing object descriptions
-		description_recompute = True
-		description_list = []
-		description_index = 0	
-		prev_mouse_y = None
-		prev_mouse_x = None
+		self.description_recompute = True
+		self.description_list = []
+		self.description_index = 0	
+		self.prev_mouse_y = None
+		self.prev_mouse_x = None
 
-		#Our main loop
-		while not libtcod.console_is_window_closed():
-			# Check for input
-			libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-			for animator in Animator.animators:
-				animator.update()
-			if Animator.blocking > 0:
-				if not game_state == GameStates.BLOCKING_ANIMATION:
-					previous_game_state = game_state
-				game_state = GameStates.BLOCKING_ANIMATION
+		self.state.pop()
+		self.state.push(GameStates.PLAYERS_TURN)
+		self.state_control(self.state.peek())
 
-			if Animator.blocking == 0 and game_state == GameStates.BLOCKING_ANIMATION:
-					game_state = previous_game_state
+	def player_turn(self):
+		# Check for input
+		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, self.key, self.mouse)
 
-			# Recompute FOV
-			if fov_recompute:
-				recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
-				recompute_fov(fov_map_no_walls, player.x, player.y, constants['fov_radius'], light_walls=False, algorithm=constants['fov_algorithm'])
+		# Recompute FOV
+		if self.fov_recompute:
+			recompute_fov(self.fov_map, self.player.x, self.player.y, self.constants['fov_radius'], self.constants['fov_light_walls'], self.constants['fov_algorithm'])
+			recompute_fov(self.fov_map_no_walls, self.player.x, self.player.y, self.constants['fov_radius'], light_walls=False, algorithm=self.constants['fov_algorithm'])
 			
 		
-			# Show object descriptions
-			if description_recompute == True:
+	
+		self.show_descriptions()
 
-				for entity in entities:
+		# Store input results
+		action = handle_keys(self.key, self.state.peek())
+		mouse_action = handle_mouse(self.mouse)
+		move = action.get('move')
+		pickup = action.get('pickup')
+		show_inventory = action.get('show_inventory')
+		drop_inventory = action.get('drop_inventory')
+		inventory_index = action.get('inventory_index')
+		take_stairs = action.get('take_stairs')
+		level_up = action.get('level_up')
+		show_character_screen = action.get('show_character_screen')
+		ability_1 = action.get('ability_1')
+		exit = action.get('exit')
+		fullscreen = action.get('fullscreen')
+		left_click = mouse_action.get('left_click')
+		right_click = mouse_action.get('right_click')
+		
 
-					if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
-						description_list = []
-						description_index = 0
-					if entity.x == mouse.cx and entity.y == mouse.cy:
-						description_list.append(entity)
-						prev_mouse_x = mouse.cx
-						prev_mouse_y = mouse.cy
 
-				
-			if len(description_list) > 0:
-				description_recompute = False
-				# We need to check to see if the mouse position changed and then clear our description list if it did, otherwise it will keep growing
-				if (prev_mouse_x != mouse.cx) or (prev_mouse_y != mouse.cy):
-					description_list = []
-					description_index = 0
-					description_recompute = True
-				if mouse.lbutton_pressed:
-					description_index += 1
-				if description_index > (len(description_list) - 1):
-					description_index = 0
+		#Instatiate our message queue for the players turn
+		self.player_turn_results = []
 
+		# Player Actions
+		# Move
+		if move:
+			if not move == 'wait':
+				dx, dy = move
+				destination_x = self.player.x + dx
+				destination_y = self.player.y + dy
+
+				# Check to see if the location we want to move to is blocked by a wall or inhabited by a creature
+				if not self.game_map.is_blocked(destination_x, destination_y):
+					target = get_blocking_entities_at_location(self.entities, destination_x, destination_y)
+
+					# If blocked by a creature, attack
+					if target:
+						attack_results = self.player.fighter.attack(target)
+						self.player_turn_results.extend(attack_results)
+					# Otherwise, move.
+					else:
+						self.player.move(dx, dy)
+						self.fov_recompute = True
+					self.turn_swap()
+			else:
+				self.turn_swap()
+
+		elif pickup:
+			for entity in self.entities:
+				if entity.item and entity.x == self.player.x and entity.y == self.player.y:
+					pickup_results = self.player.inventory.add_item(entity)
+					self.player_turn_results.extend(pickup_results)
+
+					break
+			else:
+				self.message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
+		#Ability complete checks:
+		for ability in self.player.abilities:
+			if self.player.animator.caller == ability and self.player.animator.complete:
+				self.player_turn_results.extend(ability.use(complete=True))
+				self.player.animator.caller = None
+				self.player.animator.complete = None
+
+		if ability_1:
+			player_turn_results.extend(self.player.abilities[0].use())
+
+
+		if show_inventory:
+			self.player.inventory.sort_items()
+			self.state.push(GameStates.SHOW_INVENTORY)
+
+		if drop_inventory:
+			self.state.push(GameStates.DROP_INVENTORY)
+
+
+
+		if take_stairs:
+			for entity in self.entities:
+				if entity.stairs and entity.x == self.player.x and entity.y == self.player.y: 
+					self.entities = self.game_map.next_floor(self.player, self.message_log, self.constants)
+					self.fov_map = initialize_fov(self.game_map)
+					self.target_fov_map = initialize_fov(self.game_map)
+					self.fov_map_no_walls = initialize_fov(self.game_map)
+					self.fov_recompute = True
+					self.con.clear()
+
+					break
+			else:
+				self.message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
+
+		if level_up:
+			if level_up == 'hp':
+				self.player.fighter.con += 1
+				self.message_log.add_message(Message('Your Constitution has increased by 1!', libtcod.yellow))
+			elif level_up == 'str':
+				self.player.fighter.base_power += 1
+				self.message_log.add_message(Message('Your Strength has increased by 1!', libtcod.yellow))
+			elif level_up == 'def':
+				self.player.fighter.base_defense += 1
+				self.message_log.add_message(Message('Your Defense has increased by 1!', libtcod.yellow))
+
+			hp_increase = randint(self.player.fighter.hitdie[0], self.player.fighter.hitdie[1]) + int((self.player.fighter.con - 10) / 2)
+			self.player.fighter.base_max_hp += hp_increase
+			self.player.fighter.hp += hp_increase
+			self.message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
+			self.game_state.pop()
+
+		if show_character_screen:
+			self.state.push(GameStates.CHARACTER_SCREEN)
+
+	
+						
+		if exit:
+			if self.state.peek() == GameStates.TARGETING:
+				player_turn_results.append({'targeting_cancelled': True})
+				self.cursor_radius = 1
+			else:
+				save_game(self.player, self.entities, self.game_map, self.message_log, self.game_state)
+				return True
+
+
+		if fullscreen:
+			libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+
+		self.process_turn_results()
+
+
+	def enemy_turn(self):
+		for entity in self.entities:
+			if entity.ai:
+				enemy_turn_results = entity.ai.take_turn(self.player, self.fov_map, self.game_map, self.entities)
+
+				# Capture enemy turn message queue, analyze and react accordingly.
+				for enemy_turn_result in enemy_turn_results:
+					message = enemy_turn_result.get('message')
+					dead_entity = enemy_turn_result.get('dead')
+
+					if message:
+						self.message_log.add_message(message)
+
+					if dead_entity:
+						if dead_entity == self.player:
+							message, game_state = kill_player(dead_entity)
+							self.state.push(game_state)
+						else:
+							message = kill_monster(dead_entity)
+
+						self.message_log.add_message(message)
+			
+		else:            
+
+			self.turn_swap()
+	
+	def show_descriptions(self):
+		#TODO: needs a rewrite and variable scoping
+		# Show object descriptions
+		if self.description_recompute == True:
+
+			for entity in self.entities:
+
+				if (self.prev_mouse_x != self.mouse.cx) or (self.prev_mouse_y != self.mouse.cy):
+					self.description_list = []
+					self.description_index = 0
+				if entity.x == self.mouse.cx and entity.y == self.mouse.cy:
+					self.description_list.append(entity)
+					self.prev_mouse_x = self.mouse.cx
+					self.prev_mouse_y = self.mouse.cy
 
 			
-			# Draw our scene
-			render_all(con, panel, mouse, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], constants['colors'], game_state, description_list, description_index, cursor_radius, target_fov_map, fov_map_no_walls)
-			fov_recompute = False
-			libtcod.console_flush()
+		if len(self.description_list) > 0:
+			self.description_recompute = False
+			# We need to check to see if the mouse position changed and then clear our description list if it did, otherwise it will keep growing
+			if (self.prev_mouse_x != self.mouse.cx) or (self.prev_mouse_y != self.mouse.cy):
+				self.description_list = []
+				self.description_index = 0
+				self.description_recompute = True
+			if self.mouse.lbutton_pressed:
+				self.description_index += 1
+			if self.description_index > (len(self.description_list) - 1):
+				self.description_index = 0
+	
+	def process_turn_results(self):
+		# Check player message queue and react accordingly
+		for player_turn_result in self.player_turn_results:
+			message = player_turn_result.get('message')
+			dead_entity = player_turn_result.get('dead')
+			item_added = player_turn_result.get('item_added')
+			item_consumed = player_turn_result.get('consumed')
+			item_dropped = player_turn_result.get('item_dropped')
+			equip = player_turn_result.get('equip')
+			targeting = player_turn_result.get('targeting')
+			targeting_cancelled = player_turn_result.get('targeting_cancelled')
+			ability_used = player_turn_result.get("ability_used")
+			xp = player_turn_result.get('xp')
 
+			if message:
+				self.message_log.add_message(message)
 
+			if targeting_cancelled:
+				self.state.pop()
 
-			# Store input results
-			action = handle_keys(key, game_state)
-			mouse_action = handle_mouse(mouse)
-			key = libtcod.Key()
-			mouse = libtcod.Mouse()
-			move = action.get('move')
-			pickup = action.get('pickup')
-			show_inventory = action.get('show_inventory')
-			drop_inventory = action.get('drop_inventory')
-			inventory_index = action.get('inventory_index')
-			take_stairs = action.get('take_stairs')
-			level_up = action.get('level_up')
-			show_character_screen = action.get('show_character_screen')
-			ability_1 = action.get('ability_1')
-			exit = action.get('exit')
-			fullscreen = action.get('fullscreen')
-			left_click = mouse_action.get('left_click')
-			right_click = mouse_action.get('right_click')
+				self.message_log.add_message(Message('Targeting cancelled'))
+
+			if dead_entity:
+				if dead_entity == self.player:
+					message, game_state = kill_player(dead_entity)
+					self.state.push(game_state)
+
+				else:
+					message = kill_monster(dead_entity)
+
+				self.message_log.add_message(message)
+
+			if item_added:
+				self.entities.remove(item_added)
+
+				self.turn_swap()
+
+			if item_consumed:
+				self.turn_swap()
 			
+			if targeting:
+				self.state.push(GameStates.TARGETING)
 
-
-			#Instatiate our message queue for the players turn
-			player_turn_results = []
-
-			# Player Actions
-			# Move
-			if move and game_state == GameStates.PLAYERS_TURN:
-				if not move == 'wait':
-					dx, dy = move
-					destination_x = player.x + dx
-					destination_y = player.y + dy
-
-					# Check to see if the location we want to move to is blocked by a wall or inhabited by a creature
-					if not game_map.is_blocked(destination_x, destination_y):
-						target = get_blocking_entities_at_location(entities, destination_x, destination_y)
-
-						# If blocked by a creature, attack
-						if target:
-							attack_results = player.fighter.attack(target)
-							player_turn_results.extend(attack_results)
-						# Otherwise, move.
-						else:
-							player.move(dx, dy)
-							fov_recompute = True
-						game_state = GameStates.ENEMY_TURN
+				self.targeting_item = targeting
+				if hasattr(self.targeting_item, 'item'):
+					self.message_log.add_message(self.targeting_item.item.targeting_message)
 				else:
-					game_state = GameStates.ENEMY_TURN
+					self.message_log.add_message(self.targeting_item.targeting_message)
 
-			elif pickup and game_state == GameStates.PLAYERS_TURN:
-				for entity in entities:
-					if entity.item and entity.x == player.x and entity.y == player.y:
-						pickup_results = player.inventory.add_item(entity)
-						player_turn_results.extend(pickup_results)
+			if ability_used:
+				if Animator.blocking == 0:
+					self.turn_swap()
 
-						break
-				else:
-					message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
-			#Ability complete checks:
-			for ability in player.abilities:
-				if player.animator.caller == ability and player.animator.complete:
-					player_turn_results.extend(ability.use(complete=True))
-					player.animator.caller = None
-					player.animator.complete = None
+			if item_dropped:
+				self.entities.append(item_dropped)
+				self.turn_swap()
 
-			if ability_1:
-				player_turn_results.extend(player.abilities[0].use())
+			if equip:
+				equip_results = self.player.equipment.toggle_equip(equip)
 
+				for equip_result in equip_results:
+					equipped = equip_result.get('equipped')
+					dequipped = equip_result.get('dequipped')
 
-			if show_inventory:
-				if game_state != GameStates.SHOW_INVENTORY:
-					previous_game_state = game_state
-				player.inventory.sort_items()
-				game_state = GameStates.SHOW_INVENTORY
+					if equipped:
+						self.message_log.add_message(Message('You equipped the {0}'.format(equipped.name)))
 
-			if drop_inventory:
-				if game_state != GameStates.DROP_INVENTORY:
-					previous_game_state = game_state
-				game_state = GameStates.DROP_INVENTORY
+					if dequipped:
+						self.message_log.add_message(Message('You removed the {0}'.format(dequipped.name)))
 
-			#Use or drop item in inventory
-			if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(player.inventory.items):
-				item = player.inventory.items[inventory_index]
-				if game_state == GameStates.SHOW_INVENTORY:
-					player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
+				self.turn_swap()
 
-				elif game_state == GameStates.DROP_INVENTORY:
-					player_turn_results.extend(player.inventory.drop_item(item))
+			if xp:
+				leveled_up = self.player.level.add_xp(xp)
+				self.message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
 
-			if take_stairs and game_state == GameStates.PLAYERS_TURN:
-				for entity in entities:
-					if entity.stairs and entity.x == player.x and entity.y == player.y: 
-						entities = game_map.next_floor(player, message_log, constants)
-						fov_map = initialize_fov(game_map)
-						target_fov_map = initialize_fov(game_map)
-						fov_map_no_walls = initialize_fov(game_map)
-						fov_recompute = True
-						libtcod.console_clear(con)
-
-						break
-				else:
-					message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
-
-			if level_up:
-				if level_up == 'hp':
-					player.fighter.con += 1
-					message_log.add_message(Message('Your Constitution has increased by 1!', libtcod.yellow))
-				elif level_up == 'str':
-					player.fighter.base_power += 1
-					message_log.add_message(Message('Your Strength has increased by 1!', libtcod.yellow))
-				elif level_up == 'def':
-					player.fighter.base_defense += 1
-					message_log.add_message(Message('Your Defense has increased by 1!', libtcod.yellow))
-
-				hp_increase = randint(player.fighter.hitdie[0], player.fighter.hitdie[1]) + int((player.fighter.con - 10) / 2)
-				player.fighter.base_max_hp += hp_increase
-				player.fighter.hp += hp_increase
-				message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
-				game_state = previous_game_state
-
-			if show_character_screen:
-				if not game_state == GameStates.CHARACTER_SCREEN:
-					previous_game_state = game_state
-				game_state = GameStates.CHARACTER_SCREEN
-
-			if game_state == GameStates.TARGETING:
-
-				if hasattr(targeting_item, 'item'):
-					cursor_radius = targeting_item.item.function_kwargs.get('radius')
-				else:
-					cursor_radius = targeting_item.function_kwargs.get('radius')
-				if left_click:
-					target_x, target_y = left_click
-					if hasattr(targeting_item, 'item'):
-						item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+				if leveled_up:
+					self.message_log.add_message(Message('Your battle skills grow stronger! You reached level {0}'.format(
+													self.player.level.current_level) + '!', libtcod.yellow))
+					if (self.player.level.current_level % 2) == 0:
+						self.state.push(GameStates.LEVEL_UP)
 					else:
-						item_use_results = targeting_item.use(entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
-					player_turn_results.extend(item_use_results)
-					cursor_radius = 1
-				
-				elif right_click:
-					player_turn_results.append({'targeting_cancelled': True})
-					cursor_radius = 1		
-							
-			if exit:
-				if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
-					game_state = previous_game_state
-				elif game_state == GameStates.TARGETING:
-					player_turn_results.append({'targeting_cancelled': True})
-					cursor_radius = 1
-				else:
-					save_game(player, entities, game_map, message_log, game_state)
-					return True
+						hp_increase = randint(self.player.fighter.hitdie[0], self.player.fighter.hitdie[1]) + int((self.player.fighter.con - 10) / 2)
+						self.player.fighter.base_max_hp += hp_increase
+						self.player.fighter.hp += hp_increase
+						self.message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow)) 
 
 
-			if fullscreen:
-				libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+	def targeting(self):
+		#TODO: Needs to handle input
+		if hasattr(self.targeting_item, 'item'):
+			self.cursor_radius = self.targeting_item.item.function_kwargs.get('radius')
+		else:
+			self.cursor_radius = self.targeting_item.function_kwargs.get('radius')
+		if left_click:
+			self.target_x, self.target_y = left_click
+			if hasattr(self.targeting_item, 'item'):
+				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+			else:
+				self.item_use_results = self.targeting_item.use(entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+			self.player_turn_results.extend(item_use_results)
+			self.cursor_radius = 1
+		
+		elif right_click:
+			self.player_turn_results.append({'targeting_cancelled': True})
+			self.cursor_radius = 1	
+	
+	def inventory(self):
+		#TODO: needs to pass an invetory index to use_or_drop_item when state is drop or show inventory
+		return
 
-			# Check player message queue and react accordingly
-			for player_turn_result in player_turn_results:
-				message = player_turn_result.get('message')
-				dead_entity = player_turn_result.get('dead')
-				item_added = player_turn_result.get('item_added')
-				item_consumed = player_turn_result.get('consumed')
-				item_dropped = player_turn_result.get('item_dropped')
-				equip = player_turn_result.get('equip')
-				targeting = player_turn_result.get('targeting')
-				targeting_cancelled = player_turn_result.get('targeting_cancelled')
-				ability_used = player_turn_result.get("ability_used")
-				xp = player_turn_result.get('xp')
+	def blocking_animation_update(self):
+		for animator in Animator.animators:
+			animator.update()
+		self.state.pop()
 
-				if message:
-					message_log.add_message(message)
+	
+	def use_or_drop_item(self, inventory_index, action: str):
+		##TODO: Use or drop item in inventory
+		#Return should extend player_turn_results
+		if inventory_index is not None and inventory_index < len(self.player.inventory.items):
+			item = self.player.inventory.items[inventory_index]
+			if action == 'use':
+				return self.player.inventory.use(item, entities=self.entities, fov_map=self.fov_map)
 
-				if targeting_cancelled:
-					game_state = previous_game_state
+			if action == 'drop':
+				return aelf.player.inventory.drop_item(item)
 
-					message_log.add_message(Message('Targeting cancelled'))
+	def turn_swap(self):
+		if self.state.peek() == GameStates.PLAYERS_TURN:
+			self.state.pop()
+			self.state.push(GameStates.ENEMY_TURN)
 
-				if dead_entity:
-					if dead_entity == player:
-						message, game_state = kill_player(dead_entity)
-					else:
-						message = kill_monster(dead_entity)
-
-					message_log.add_message(message)
-
-				if item_added:
-					entities.remove(item_added)
-
-					game_state = GameStates.ENEMY_TURN
-
-				if item_consumed:
-					game_state = GameStates.ENEMY_TURN
-				
-				if targeting:
-					previous_game_state = GameStates.PLAYERS_TURN
-					game_state = GameStates.TARGETING
-
-					targeting_item = targeting
-					if hasattr(targeting_item, 'item'):
-						message_log.add_message(targeting_item.item.targeting_message)
-					else:
-						message_log.add_message(targeting_item.targeting_message)
-
-				if ability_used:
-					if Animator.blocking == 0:
-						game_state = GameStates.ENEMY_TURN
-
-				if item_dropped:
-					entities.append(item_dropped)
-					game_state = GameStates.ENEMY_TURN
-
-				if equip:
-					equip_results = player.equipment.toggle_equip(equip)
-
-					for equip_result in equip_results:
-						equipped = equip_result.get('equipped')
-						dequipped = equip_result.get('dequipped')
-
-						if equipped:
-							message_log.add_message(Message('You equipped the {0}'.format(equipped.name)))
-
-						if dequipped:
-							message_log.add_message(Message('You removed the {0}'.format(dequipped.name)))
-
-					game_state = GameStates.ENEMY_TURN
-
-				if xp:
-					leveled_up = player.level.add_xp(xp)
-					message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
-
-					if leveled_up:
-						message_log.add_message(Message('Your battle skills grow stronger! You reached level {0}'.format(
-														player.level.current_level) + '!', libtcod.yellow))
-						if (player.level.current_level % 2) == 0:
-							previous_game_state = game_state
-							game_state = GameStates.LEVEL_UP
-						else:
-							hp_increase = randint(player.fighter.hitdie[0], player.fighter.hitdie[1]) + int((player.fighter.con - 10) / 2)
-							player.fighter.base_max_hp += hp_increase
-							player.fighter.hp += hp_increase
-							message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
-
-
-			# Enemy Turn
-			if game_state == GameStates.ENEMY_TURN:
-				for entity in entities:
-					if entity.ai:
-						enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
-
-						# Capture enemy turn message queue, analyze and react accordingly.
-						for enemy_turn_result in enemy_turn_results:
-							message = enemy_turn_result.get('message')
-							dead_entity = enemy_turn_result.get('dead')
-
-							if message:
-								message_log.add_message(message)
-
-							if dead_entity:
-								if dead_entity == player:
-									message, game_state = kill_player(dead_entity)
-								else:
-									message = kill_monster(dead_entity)
-
-								message_log.add_message(message)
-
-								if game_state == GameStates.PLAYER_DEAD:
-									break
-						if game_state == GameStates.PLAYER_DEAD:
-							break
-
-					
-				else:            
-
-					game_state = GameStates.PLAYERS_TURN
+		elif self.state.peek() == GameStates.ENEMY_TURN:
+			self.state.pop()
+			self.state.push(GameStates.PLAYERS_TURN)
 
 class StateMachine(object):
 	"""

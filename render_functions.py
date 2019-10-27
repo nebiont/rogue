@@ -36,7 +36,7 @@ class Renderer:
 	def state_control(self, state):
 		switcher = {
 			GameStates.MAIN_MENU: None,
-			GameStates.PLAY_GAME: self.render_all
+			GameStates.PLAYERS_TURN: self.render_all
 		}
 		func = switcher.get(state)
 		if not func == None:
@@ -75,6 +75,7 @@ class Renderer:
 		libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
 		self.isinitialized = True	
 	
+	
 	def render_all(self):
 		"""
 		Draw the current game state on screen.
@@ -83,8 +84,9 @@ class Renderer:
 		
 		if not self.isinitialized:
 			return
-				# draw all the tiles in the game map
-		self.clear_all(self.engine.con, self.engine.entities)
+		# draw all the tiles in the game map
+		#libtcod.console_clear(self.engine.con)
+		libtcod.console_blit(self.engine.con, 0, 0, self.constants['screen_width'], self.constants['screen_height'], 0, 0, 0)
 		if self.engine.fov_recompute:
 			for y in range(self.engine.game_map.height):
 				for x in range(self.engine.game_map.width):
@@ -102,6 +104,8 @@ class Renderer:
 							libtcod.console_set_char_background(self.engine.con, x, y, self.colors.get('dark_wall'), libtcod.BKGND_SET)
 						else:
 							libtcod.console_set_char_background(self.engine.con, x, y, self.colors.get('dark_ground'), libtcod.BKGND_SET)			
+			self.fov_recompute = False
+
 
 		#draw all entities in the list
 		entities_in_render_order = sorted(self.engine.entities, key=lambda x: x.render_order.value)
@@ -144,6 +148,8 @@ class Renderer:
 
 		elif len(self.engine.description_list) > 0:
 			entity_description(self.engine.con, self.engine.description_list, self.engine.description_index, 50, self.constants['screen_width'], self.constants['screen_height'])
+		libtcod.console_flush()
+		self.clear_all(self.engine.con, self.engine.entities)
 		
 		
 
