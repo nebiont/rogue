@@ -31,9 +31,8 @@ class InputHandler(object):
 					self.evmanager.Post(QuitEvent())
 				# handle key down events
 				if event.type == "KEYDOWN" or event.type == "TEXTINPUT" or event.type == "MOUSEBUTTONDOWN":
-					if event.type =="KEYDOWN":
-						if event.sym == libtcod.event.K_ESCAPE:
-							self.evmanager.Post(StateChangeEvent(None))
+					if event.type =="KEYDOWN" and event.sym == libtcod.KEY_ESCAPE:
+						self.evmanager.Post(StateChangeEvent(None))
 					else:
 						currentstate = self.engine.state.peek()
 						if currentstate == GameStates.MAIN_MENU:
@@ -48,6 +47,7 @@ class InputHandler(object):
 							self.level_up(event)
 						if currentstate == GameStates.ROLE_MENU:
 							self.role_menu(event)
+				# handle mouse movement
 				if event.type == "MOUSEMOTION":
 					self.evmanager.Post(Mouse_motion_event(event))
 
@@ -148,11 +148,11 @@ class InputHandler(object):
 				self.evmanager.Post(StateChangeEvent(None))
 
 		if key_char == 'a':
-			self.evmanager.Post({'level_up': 'hp'})
+			self.evmanager.Post(InputEvent({'level_up': 'hp'}))
 		elif key_char =='b':
-			self.evmanager.Post({'level_up': 'str'})
+			self.evmanager.Post(InputEvent({'level_up': 'str'}))
 		elif key_char =='c':
-			self.evmanager.Post({'level_up': 'def'})	
+			self.evmanager.Post(InputEvent({'level_up': 'def'}))	
 
 	def role_menu(self, event):
 		"""
@@ -160,22 +160,23 @@ class InputHandler(object):
 		"""
 		if event.type == "TEXTINPUT":
 			key_char = event.text
+			if key_char == 'a':
+				self.evmanager.Post(InputEvent({'warrior': True}))
+			elif key_char =='b':
+				self.evmanager.Post(InputEvent({'ranger': True}))
+			elif key_char =='c':
+				self.evmanager.Post(InputEvent({'rogue': True}))
+			elif key_char =='d':
+				self.evmanager.Post(InputEvent({'paladin': True}))
+			elif key_char =='e':
+				self.evmanager.Post(InputEvent({'warlock': True}))
 		# escape pops the menu
 		elif event.type == "KEYDOWN":
 			if event.sym == libtcod.event.K_ESCAPE:
 				self.evmanager.Post(StateChangeEvent(None))
 				self.evmanager.Post(InputEvent({'back': True}))
-			if event.sym == libtcod.event.K_KP_ENTER:
+			if event.sym == libtcod.event.K_KP_ENTER or libtcod.event.K_RETURN:
 				self.evmanager.Post(InputEvent({'accept': True}))
 
-		if key_char == 'a':
-			self.evmanager.Post({'warrior': True})
-		elif key_char =='b':
-			self.evmanager.Post({'ranger': True})
-		elif key_char =='c':
-			self.evmanager.Post({'rogue': True})
-		elif key_char =='d':
-			self.evmanager.Post({'paladin': True})
-		elif key_char =='e':
-			self.evmanager.Post({'warlock': True})
+
 	

@@ -52,11 +52,9 @@ class GameEngine:
 		self.show_game = False
 		self.show_load_error_message = False
 
-		self.main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
+		self.mouse = None
 
-		# Capture keyboard and mouse input
-		self.key = libtcod.Key()
-		self.mouse = libtcod.Mouse()
+		self.main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
 
 		self.fov_recompute = None
 		self.fov_map = None
@@ -106,7 +104,7 @@ class GameEngine:
 			self.action = event.action
 
 		if isinstance(event, Mouse_motion_event):
-			self.mouse = event
+			self.mouse = event.mouse_event
 
 	def run(self):
 		"""
@@ -120,6 +118,8 @@ class GameEngine:
 		self.state.push(GameStates.MAIN_MENU)
 		while self.running:
 			self.state_control(self.state.peek())
+			# Clear the action so that we don't remember actions from previous game states / ticks
+			self.action = {}
 			newTick = TickEvent()
 			self.evmanager.Post(newTick)
 			
@@ -152,6 +152,7 @@ class GameEngine:
 				self.state.push(GameStates.PLAY_GAME)
 			except FileNotFoundError:
 				self.show_load_error_message = True
+
 
 	def role_menu(self):
 		warrior = self.action.get('warrior')
@@ -216,8 +217,6 @@ class GameEngine:
 		self.state_control(self.state.peek())
 
 	def player_turn(self):
-		# Check for input
-		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, self.key, self.mouse)
 
 		# Recompute FOV
 		if self.fov_recompute:
@@ -229,19 +228,19 @@ class GameEngine:
 		self.show_descriptions()
 
 		# Store input results
-		move = action.get('move')
-		pickup = action.get('pickup')
-		show_inventory = action.get('show_inventory')
-		drop_inventory = action.get('drop_inventory')
-		inventory_index = action.get('inventory_index')
-		take_stairs = action.get('take_stairs')
-		level_up = action.get('level_up')
-		show_character_screen = action.get('show_character_screen')
-		ability_1 = action.get('ability_1')
-		exit = action.get('exit')
-		fullscreen = action.get('fullscreen')
-		left_click = action.get('left_click')
-		right_click = action.get('right_click')
+		move = self.action.get('move')
+		pickup = self.action.get('pickup')
+		show_inventory = self.action.get('show_inventory')
+		drop_inventory = self.action.get('drop_inventory')
+		inventory_index = self.action.get('inventory_index')
+		take_stairs = self.action.get('take_stairs')
+		level_up = self.action.get('level_up')
+		show_character_screen = self.action.get('show_character_screen')
+		ability_1 = self.action.get('ability_1')
+		exit = self.action.get('exit')
+		fullscreen = self.action.get('fullscreen')
+		left_click = self.action.get('left_click')
+		right_click = self.action.get('right_click')
 		
 
 
@@ -385,19 +384,19 @@ class GameEngine:
 
 			for entity in self.entities:
 
-				if (self.prev_mouse_x != self.mouse.cx) or (self.prev_mouse_y != self.mouse.cy):
+				if (self.prev_mouse_x != self.mouse.tile.x) or (self.prev_mouse_y != self.mouse.tile.y):
 					self.description_list = []
 					self.description_index = 0
-				if entity.x == self.mouse.cx and entity.y == self.mouse.cy:
+				if entity.x == self.mouse.tile.x and entity.y == self.mouse.tile.y:
 					self.description_list.append(entity)
-					self.prev_mouse_x = self.mouse.cx
-					self.prev_mouse_y = self.mouse.cy
+					self.prev_mouse_x = self.mouse.tile.x
+					self.prev_mouse_y = self.mouse.tile.y
 
 			
 		if len(self.description_list) > 0:
 			self.description_recompute = False
 			# We need to check to see if the mouse position changed and then clear our description list if it did, otherwise it will keep growing
-			if (self.prev_mouse_x != self.mouse.cx) or (self.prev_mouse_y != self.mouse.cy):
+			if (self.prev_mouse_x != self.mouse.tile.x) or (self.prev_mouse_y != self.mouse.tile.y):
 				self.description_list = []
 				self.description_index = 0
 				self.description_recompute = True

@@ -48,7 +48,7 @@ class Mouse_motion_event(Event):
 
 	def __init__(self, mousemotion_event):
 		self.name = 'Mouse Coordinates'
-		self.mouse_event = Mouse_motion_event
+		self.mouse_event = mousemotion_event
 	def __str__(self):
 		return '%s, mouse_event=%s' % (self.name, self.mouse_event)
 

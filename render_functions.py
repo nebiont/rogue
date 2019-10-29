@@ -68,7 +68,7 @@ class Renderer:
 		self.colors = self.constants['colors']
 
 		# Limit FPS to 100 so we dont kill CPUs
-		libtcod.sys_set_fps(60)
+		#libtcod.sys_set_fps(60)
 
 		# Load font and create root console (what you see)
 		libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
