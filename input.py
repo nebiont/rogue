@@ -4,7 +4,7 @@ import engine
 from game_states import GameStates
 from event_manager import *
 
-class Input(object):
+class InputHandler(object):
 	"""
 	Handles keyboard input.
 	"""
@@ -30,9 +30,10 @@ class Input(object):
 				if event.type == "QUIT":
 					self.evmanager.Post(QuitEvent())
 				# handle key down events
-				if event.type == "KEYDOWN":
-					if event.sym == libtcod.event.K_ESCAPE:
-						self.evmanager.Post(StateChangeEvent(None))
+				if event.type == "KEYDOWN" or event.type == "TEXTINPUT" or event.type == "MOUSEBUTTONDOWN":
+					if event.type =="KEYDOWN":
+						if event.sym == libtcod.event.K_ESCAPE:
+							self.evmanager.Post(StateChangeEvent(None))
 					else:
 						currentstate = self.engine.state.peek()
 						if currentstate == GameStates.MAIN_MENU:
@@ -41,10 +42,12 @@ class Input(object):
 							self.players_turn(event)
 						if currentstate == GameStates.SHOW_INVENTORY or currentstate == GameStates.DROP_INVENTORY:
 							self.inventory(event)
-						if currentstate == GameStates.TARGETING:
-							self.targeting()
+						# if currentstate == GameStates.TARGETING:
+						# 	self.targeting()
 						if currentstate == GameStates.LEVEL_UP:
-							self.level_up()
+							self.level_up(event)
+						if currentstate == GameStates.ROLE_MENU:
+							self.role_menu(event)
 				if event.type == "MOUSEMOTION":
 					self.evmanager.Post(Mouse_motion_event(event))
 
@@ -52,11 +55,12 @@ class Input(object):
 		"""
 		Handles menu key events.
 		"""
-		key_char = chr(event.key.scancode)
-		# escape pops the menu
-		if event.key == libtcod.KEY_ESCAPE:
-			self.evmanager.Post(StateChangeEvent(None))
-
+		key_char = None
+		if event.type == "TEXTINPUT":
+			key_char = event.text
+		if event.type == "KEYDOWN":
+			if event.sym == libtcod.event.K_ESCAPE:
+				self.evmanager.Post(StateChangeEvent(None))
 		if key_char == 'a':
 			self.evmanager.Post(InputEvent({'new_game': True}))
 		elif key_char == 'b':
@@ -68,47 +72,110 @@ class Input(object):
 		"""
 		Handles menu key events.
 		"""
-		key_char = chr(event.key.scancode)
-		# escape pops the menu
-		if event.key == libtcod.KEY_ESCAPE:
-			self.evmanager.Post(StateChangeEvent(None))
-	
-		# Movement keys
-		if event.key == libtcod.KEY_UP or event.key == libtcod.KEY_KP8:
-			self.evmanager.Post(InputEvent({'move': (0, -1)}))
-		elif event.key == libtcod.KEY_DOWN or event.key == libtcod.KEY_KP2:
-			self.evmanager.Post(InputEvent({'move': (0, 1)}))
-		elif event.key == libtcod.KEY_LEFT or event.key == libtcod.KEY_KP4:
-			self.evmanager.Post(InputEvent({'move': (-1, 0)}))
-		elif event.key == libtcod.KEY_RIGHT or event.key == libtcod.KEY_KP6:
-			self.evmanager.Post(InputEvent({'move': (1, 0)}))
-		elif event.key == libtcod.KEY_KP1:
-			self.evmanager.Post(InputEvent({'move': (-1, 1)}))
-		elif event.key == libtcod.KEY_KP3:
-			self.evmanager.Post(InputEvent({'move': (1, 1)}))
-		elif event.key == libtcod.KEY_KP7:
-			self.evmanager.Post(InputEvent({'move': (-1, -1)}))
-		elif event.key == libtcod.KEY_KP9:
-			self.evmanager.Post(InputEvent({'move': (1, -1)}))
-		elif event.key == libtcod.KEY_KP5:
-			self.evmanager.Post(InputEvent({'move': 'wait'}))
+		if event.type == "TEXTINPUT":
+			key_char = event.text
+			if key_char == 'g':
+				self.evmanager.Post(InputEvent({'pickup': True}))
+			
+			elif key_char == 'i':
+				self.evmanager.Post(InputEvent({'show_inventory': True}))
 
-		if key_char == 'g':
-			self.evmanager.Post(InputEvent({'pickup': True}))
+			elif key_char == 'd':
+				self.evmanager.Post(InputEvent({'drop_inventory': True}))
+
+			elif key_char == 'c':
+				self.evmanager.Post(InputEvent({'show_character_screen': True}))
+
+			elif key_char == '1':
+				self.evmanager.Post(InputEvent({'ability_1': True}))
+
+		elif event.type == "KEYDOWN":
+			if event.sym == libtcod.event.K_ESCAPE:
+				self.evmanager.Post(StateChangeEvent(None))
 		
-		elif key_char == 'i':
-			self.evmanager.Post(InputEvent({'show_inventory': True}))
+			# Movement keys
+			if event.sym == libtcod.event.K_UP or event.sym == libtcod.event.K_KP_8:
+				self.evmanager.Post(InputEvent({'move': (0, -1)}))
+			elif event.sym == libtcod.event.K_DOWN or event.sym == libtcod.event.K_KP_2:
+				self.evmanager.Post(InputEvent({'move': (0, 1)}))
+			elif event.sym == libtcod.event.K_LEFT or event.sym == libtcod.event.K_KP_4:
+				self.evmanager.Post(InputEvent({'move': (-1, 0)}))
+			elif event.sym == libtcod.event.K_RIGHT or event.sym == libtcod.event.K_KP_6:
+				self.evmanager.Post(InputEvent({'move': (1, 0)}))
+			elif event.sym == libtcod.event.K_KP_1:
+				self.evmanager.Post(InputEvent({'move': (-1, 1)}))
+			elif event.sym == libtcod.event.K_KP_3:
+				self.evmanager.Post(InputEvent({'move': (1, 1)}))
+			elif event.sym == libtcod.event.K_KP_7:
+				self.evmanager.Post(InputEvent({'move': (-1, -1)}))
+			elif event.sym == libtcod.event.K_KP_9:
+				self.evmanager.Post(InputEvent({'move': (1, -1)}))
+			elif event.sym == libtcod.event.K_KP_5:
+				self.evmanager.Post(InputEvent({'move': 'wait'}))
 
-		elif key_char == 'd':
-			self.evmanager.Post(InputEvent({'drop_inventory': True}))
+			elif event.sym == libtcod.event.K_KP_ENTER:
+				self.evmanager.Post(InputEvent({'take_stairs': True}))
 
-		elif key_char == 'c':
-			self.evmanager.Post(InputEvent({'show_character_screen': True}))
-
-		elif key_char == '1':
-			self.evmanager.Post(InputEvent({'ability_1': True}))
-
-		elif event.key == libtcod.KEY_ENTER:
-			self.evmanager.Post(InputEvent({'take_stairs': True}))
+		elif event.type == "MOUSEBUTTONDOWN":
+			if event.button == libtcod.event.BUTTON_LEFT:
+				self.evmanager.Post(InputEvent({'left-click': event.tile}))
+			elif event.button == libtcod.event.BUTTON_RIGHT:
+				self.evmanager.Post(InputEvent({'right-click': event.tile}))
 							
+	def inventory(self, event):
+		"""
+		Handles menu key events.
+		"""
+		if event.type == "TEXTINPUT":
+			index = ord(event.text) - ord('a')
+		# escape pops the menu
+		elif event.type == "KEYDOWN":
+			if event.sym == libtcod.event.K_ESCAPE:
+				self.evmanager.Post(StateChangeEvent(None))
 
+		if index >= 0:
+			self.evmanager.Post(InputEvent({'inventory_index': index}))
+
+	def level_up(self, event):
+		"""
+		Handles menu key events.
+		"""
+		if event.type == "TEXTINPUT":
+			key_char = event.text
+		# escape pops the menu
+		elif event.type == "KEYDOWN":
+			if event.sym == libtcod.event.K_ESCAPE:
+				self.evmanager.Post(StateChangeEvent(None))
+
+		if key_char == 'a':
+			self.evmanager.Post({'level_up': 'hp'})
+		elif key_char =='b':
+			self.evmanager.Post({'level_up': 'str'})
+		elif key_char =='c':
+			self.evmanager.Post({'level_up': 'def'})	
+
+	def role_menu(self, event):
+		"""
+		Handles menu key events.
+		"""
+		if event.type == "TEXTINPUT":
+			key_char = event.text
+		# escape pops the menu
+		elif event.type == "KEYDOWN":
+			if event.sym == libtcod.event.K_ESCAPE:
+				self.evmanager.Post(StateChangeEvent(None))
+				self.evmanager.Post(InputEvent({'back': True}))
+			if event.sym == libtcod.event.K_KP_ENTER:
+				self.evmanager.Post(InputEvent({'accept': True}))
+
+		if key_char == 'a':
+			self.evmanager.Post({'warrior': True})
+		elif key_char =='b':
+			self.evmanager.Post({'ranger': True})
+		elif key_char =='c':
+			self.evmanager.Post({'rogue': True})
+		elif key_char =='d':
+			self.evmanager.Post({'paladin': True})
+		elif key_char =='e':
+			self.evmanager.Post({'warlock': True})
+	

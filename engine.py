@@ -63,6 +63,8 @@ class GameEngine:
 		self.target_fov_map = None
 		self.fov_map_no_walls = None
 
+		self.action = {}
+
 		mixer.init()
 		mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
 		mixer.music.set_volume(0.05)
@@ -72,6 +74,7 @@ class GameEngine:
 	def state_control(self, state):
 		switcher = {
 			GameStates.MAIN_MENU: self.main_menu,
+			GameStates.ROLE_MENU: self.role_menu,
 			GameStates.PLAY_GAME: self.play_game,
 			GameStates.PLAYERS_TURN: self.player_turn,
 			GameStates.BLOCKING_ANIMATION: self.blocking_animation_update,
@@ -99,6 +102,12 @@ class GameEngine:
 				# push a new state on the stack
 				self.state.push(event.state)
 
+		if isinstance(event, InputEvent):
+			self.action = event.action
+
+		if isinstance(event, Mouse_motion_event):
+			self.mouse = event
+
 	def run(self):
 		"""
 		Starts the game engine loop.
@@ -119,81 +128,70 @@ class GameEngine:
 	def main_menu(self):
 		#TODO: Separate a bunch of this stuff to the render_function
 		# Check for input
-		libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, self.key, self.mouse)
+
+		main_menu(self.con, self.main_menu_background_image, self.constants['screen_width'], self.constants['screen_height'])
+
+		if self.show_load_error_message:
+			message_box(self.con, 'No save game to load', 50, self.constants['screen_width'], self.constants['screen_height'])
+
+		libtcod.console_flush()
+
+		new_game = self.action.get('new_game')
+		load_saved_game = self.action.get('load_game')
+		exit_game = self.action.get('exit')
+
+		if self.show_load_error_message and (new_game or load_saved_game or exit_game):
+			self.show_load_error_message = False
+		elif new_game:
+			self.state.push(GameStates.ROLE_MENU)
 		
-		if self.show_main_menu:
+		elif load_saved_game:
+			try:
+				self.player, self.entities, self.game_map, self.message_log, self.game_state = load_game()
+				libtcod.console_clear(self.con)
+				self.state.push(GameStates.PLAY_GAME)
+			except FileNotFoundError:
+				self.show_load_error_message = True
 
-			main_menu(self.con, self.main_menu_background_image, self.constants['screen_width'], self.constants['screen_height'])
+	def role_menu(self):
+		warrior = self.action.get('warrior')
+		ranger = self.action.get('ranger')
+		rogue = self.action.get('rogue')
+		paladin = self.action.get('paladin')
+		warlock = self.action.get('warlock')
+		back = self.action.get('exit')
+		accept = self.action.get('accept')
+		libtcod.console_clear(0)
+		role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
+		libtcod.console_flush()
 
-			if self.show_load_error_message:
-				message_box(self.con, 'No save game to load', 50, self.constants['screen_width'], self.constants['screen_height'])
-
-			libtcod.console_flush()
-
-			
-			action = handle_main_menu(self.key)
-
-			new_game = action.get('new_game')
-			load_saved_game = action.get('load_game')
-			exit_game = action.get('exit')
-
-			if self.show_load_error_message and (new_game or load_saved_game or exit_game):
-				self.show_load_error_message = False
-			elif new_game:
-				self.show_main_menu = False
-				self.show_game = True
-			
-			elif load_saved_game:
-				try:
-					self.player, self.entities, self.game_map, self.message_log, self.game_state = load_game()
-					self.show_main_menu = False
-				except FileNotFoundError:
-					self.show_load_error_message = True
-
-		elif self.show_game:
-			action = handle_role_select(self.key)
-			warrior = action.get('warrior')
-			ranger = action.get('ranger')
-			rogue = action.get('rogue')
-			paladin = action.get('paladin')
-			warlock = action.get('warlock')
-			back = action.get('exit')
-			accept = action.get('accept')
-			libtcod.console_clear(0)
+		if warrior:
+			self.player = get_dummy_player(Warrior())
 			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
 			libtcod.console_flush()
-
-			if warrior:
-				player = get_dummy_player(Warrior())
-				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
-				libtcod.console_flush()
-			if ranger:
-				player = get_dummy_player(Ranger())
-				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
-				libtcod.console_flush()
-			if rogue:
-				player = get_dummy_player(Rogue())
-				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
-				libtcod.console_flush()
-			if paladin:
-				player = get_dummy_player(Paladin())
-				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
-				libtcod.console_flush()
-			if warlock:
-				player = get_dummy_player(Warlock())
-				role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], player.role)
-				libtcod.console_flush()
-			if accept:
-				self.player, self.entities, self.game_map, self.message_log, self.game_state = get_game_variables(self.constants, self.player)
-				self.show_game = False
-			if back:
-				self.show_main_menu = True
-
-		else:
+		if ranger:
+			self.player = get_dummy_player(Ranger())
+			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
+			libtcod.console_flush()
+		if rogue:
+			self.player = get_dummy_player(Rogue())
+			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
+			libtcod.console_flush()
+		if paladin:
+			self.player = get_dummy_player(Paladin())
+			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
+			libtcod.console_flush()
+		if warlock:
+			self.player = get_dummy_player(Warlock())
+			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
+			libtcod.console_flush()
+		if accept:
+			self.player, self.entities, self.game_map, self.message_log, self.game_state = get_game_variables(self.constants, self.player)
 			libtcod.console_clear(self.con)
+			self.state.pop()
 			self.state.push(GameStates.PLAY_GAME)
-
-			self.show_main_menu = True
+		if back:
+			self.state.pop()
 		
 	def play_game(self):
 		# Intialize FOV map.
@@ -231,8 +229,6 @@ class GameEngine:
 		self.show_descriptions()
 
 		# Store input results
-		action = handle_keys(self.key, self.state.peek())
-		mouse_action = handle_mouse(self.mouse)
 		move = action.get('move')
 		pickup = action.get('pickup')
 		show_inventory = action.get('show_inventory')
@@ -244,8 +240,8 @@ class GameEngine:
 		ability_1 = action.get('ability_1')
 		exit = action.get('exit')
 		fullscreen = action.get('fullscreen')
-		left_click = mouse_action.get('left_click')
-		right_click = mouse_action.get('right_click')
+		left_click = action.get('left_click')
+		right_click = action.get('right_click')
 		
 
 

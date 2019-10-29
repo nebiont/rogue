@@ -39,7 +39,7 @@ class InputEvent(Event):
 		self.action = action
 		self.clickpos = clickpos
 	def __str__(self):
-		return '%s, char=%s, clickpos=%s' % (self.name, self.char, self.clickpos)
+		return '%s, char=%s, clickpos=%s' % (self.name, self.action, self.clickpos)
 
 class Mouse_motion_event(Event):
 	"""

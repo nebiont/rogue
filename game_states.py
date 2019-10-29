@@ -13,3 +13,4 @@ class GameStates(Enum):
     BLOCKING_ANIMATION = auto()
     MAIN_MENU = auto()
     PLAY_GAME = auto()
+    ROLE_MENU = auto()
