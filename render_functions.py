@@ -6,6 +6,7 @@ from fov_functions import recompute_fov
 import math
 import os
 import definitions
+import warnings
 from event_manager import *
 
 class RenderOrder(Enum):
@@ -72,7 +73,6 @@ class Renderer:
 
 		# Load font and create root console (what you see)
 		libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
-		libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
 		self.isinitialized = True	
 	
 	
@@ -81,6 +81,7 @@ class Renderer:
 		Draw the current game state on screen.
 		Does nothing if isinitialized == False (pygame.init failed)
 		"""
+		warnings.simplefilter('always')
 		
 		if not self.isinitialized:
 			return
@@ -90,7 +91,8 @@ class Renderer:
 		if self.engine.fov_recompute:
 			for y in range(self.engine.game_map.height):
 				for x in range(self.engine.game_map.width):
-					visible = libtcod.map_is_in_fov(self.engine.fov_map, x, y)
+					visible = self.engine.fov_map.fov[x,y]
+					#visible = libtcod.map_is_in_fov(self.engine.fov_map, x, y)
 					wall = self.engine.game_map.tiles[x][y].block_sight
 
 					if visible:
@@ -130,8 +132,7 @@ class Renderer:
 
 		self.render_bar(self.engine.panel, 1, 1, self.constants['bar_width'], 'HP', self.engine.player.fighter.hp, self.engine.player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
 		libtcod.console_print_ex(self.engine.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(self.engine.game_map.dungeon_level))
-		libtcod.console_blit(self.engine.panel, 0, 0, self.constants['screen_width'], self.constants['panel_height'], 0, 0, self.constants['panel_y'])
-
+		self.engine.panel.blit(self.engine.root, 0, self.constants['panel_y'], 0, 0, self.constants['screen_width'], self.constants['panel_height'])
 		if self.engine.game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
 			if self.engine.game_state == GameStates.SHOW_INVENTORY:
 				inventory_title = 'Press the key next to an item to use it, or Esc to cancel.'

@@ -13,6 +13,7 @@ from components.role import Warrior, Ranger, Rogue, Warlock, Paladin
 from pygame import mixer
 from random import randint
 from event_manager import *
+from input import MouseHandler
 import definitions
 import os
 from time import sleep
@@ -34,6 +35,8 @@ class GameEngine:
 		evmanager.RegisterListener(self)
 		self.state = StateMachine()
 		self.running = False
+		self.root = libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
+
 
 				#define main variables
 		self.constants = get_constants()
@@ -52,8 +55,7 @@ class GameEngine:
 		self.show_game = False
 		self.show_load_error_message = False
 
-		self.mouse = None
-
+		self.mouse = MouseHandler()
 		self.main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
 
 		self.fov_recompute = None
@@ -103,8 +105,11 @@ class GameEngine:
 		if isinstance(event, InputEvent):
 			self.action = event.action
 
-		if isinstance(event, Mouse_motion_event):
-			self.mouse = event.mouse_event
+		if isinstance(event, Mouse_event):
+			if event.mouse_event.type == "MOUSEMOTION":
+				self.mouse.motion = event.mouse_event
+			if event.mouse_event.type =="MOUSEBUTTONDOWN":
+				self.mouse.button = event.mouse_event
 
 	def run(self):
 		"""
@@ -288,7 +293,7 @@ class GameEngine:
 				self.player.animator.complete = None
 
 		if ability_1:
-			player_turn_results.extend(self.player.abilities[0].use())
+			self.player_turn_results.extend(self.player.abilities[0].use())
 
 
 		if show_inventory:
@@ -338,7 +343,7 @@ class GameEngine:
 						
 		if exit:
 			if self.state.peek() == GameStates.TARGETING:
-				player_turn_results.append({'targeting_cancelled': True})
+				self.player_turn_results.append({'targeting_cancelled': True})
 				self.cursor_radius = 1
 			else:
 				save_game(self.player, self.entities, self.game_map, self.message_log, self.game_state)
@@ -384,23 +389,24 @@ class GameEngine:
 
 			for entity in self.entities:
 
-				if (self.prev_mouse_x != self.mouse.tile.x) or (self.prev_mouse_y != self.mouse.tile.y):
+				if (self.prev_mouse_x != self.mouse.motion.tile.x) or (self.prev_mouse_y != self.mouse.motion.tile.y):
 					self.description_list = []
 					self.description_index = 0
-				if entity.x == self.mouse.tile.x and entity.y == self.mouse.tile.y:
+				if entity.x == self.mouse.motion.tile.x and entity.y == self.mouse.motion.tile.y:
 					self.description_list.append(entity)
-					self.prev_mouse_x = self.mouse.tile.x
-					self.prev_mouse_y = self.mouse.tile.y
+					self.prev_mouse_x = self.mouse.motion.tile.x
+					self.prev_mouse_y = self.mouse.motion.tile.y
 
 			
 		if len(self.description_list) > 0:
 			self.description_recompute = False
 			# We need to check to see if the mouse position changed and then clear our description list if it did, otherwise it will keep growing
-			if (self.prev_mouse_x != self.mouse.tile.x) or (self.prev_mouse_y != self.mouse.tile.y):
+			if (self.prev_mouse_x != self.mouse.motion.tile.x) or (self.prev_mouse_y != self.mouse.motion.tile.y):
 				self.description_list = []
 				self.description_index = 0
 				self.description_recompute = True
-			if self.mouse.lbutton_pressed:
+			#TODO: should not be handling mouse button here, should happen in input
+			if self.mouse.button.button == libtcod.event.BUTTON_LEFT:
 				self.description_index += 1
 			if self.description_index > (len(self.description_list) - 1):
 				self.description_index = 0

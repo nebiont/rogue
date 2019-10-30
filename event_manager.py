@@ -41,14 +41,14 @@ class InputEvent(Event):
 	def __str__(self):
 		return '%s, char=%s, clickpos=%s' % (self.name, self.action, self.clickpos)
 
-class Mouse_motion_event(Event):
+class Mouse_event(Event):
 	"""
 	Mouse movement event
 	"""
 
-	def __init__(self, mousemotion_event):
-		self.name = 'Mouse Coordinates'
-		self.mouse_event = mousemotion_event
+	def __init__(self, mouse_event):
+		self.name = 'Mouse Event'
+		self.mouse_event = mouse_event
 	def __str__(self):
 		return '%s, mouse_event=%s' % (self.name, self.mouse_event)
 
@@ -114,8 +114,8 @@ class EventManager(object):
 		It will be broadcast to all listeners.
 		"""
 		
-		if not isinstance(event, TickEvent):
+		#if not isinstance(event, TickEvent):
 			# print the event (unless it is TickEvent)
-			print(str(event))
+			#print(str(event))
 		for listener in self.listeners.keys():
 			listener.notify(event)
