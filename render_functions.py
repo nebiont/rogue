@@ -36,10 +36,14 @@ class Renderer:
 		
 	def state_control(self, state):
 		switcher = {
-			GameStates.MAIN_MENU: None,
-			GameStates.PLAYERS_TURN: self.render_all
+			GameStates.PLAYERS_TURN: self.render_all,
+			GameStates.SHOW_INVENTORY: self.render_all,
+			GameStates.DROP_INVENTORY: self.render_all
 		}
-		func = switcher.get(state)
+		try:
+			func = switcher.get(state)
+		except: 
+			return None
 		if not func == None:
 			func()
 	
@@ -73,6 +77,7 @@ class Renderer:
 
 		# Load font and create root console (what you see)
 		libtcod.console_set_custom_font(os.path.join(definitions.ROOT_DIR,'Nice_curses_12x12.png'), libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+		self.root = libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
 		self.isinitialized = True	
 	
 	
@@ -81,13 +86,12 @@ class Renderer:
 		Draw the current game state on screen.
 		Does nothing if isinitialized == False (pygame.init failed)
 		"""
-		warnings.simplefilter('always')
+		#warnings.simplefilter('always')
 		
 		if not self.isinitialized:
 			return
 		# draw all the tiles in the game map
-		#libtcod.console_clear(self.engine.con)
-		libtcod.console_blit(self.engine.con, 0, 0, self.constants['screen_width'], self.constants['screen_height'], 0, 0, 0)
+		self.engine.con.blit(self.root, 0, 0, 0, 0, self.constants['screen_width'], self.constants['screen_height'])
 		if self.engine.fov_recompute:
 			for y in range(self.engine.game_map.height):
 				for x in range(self.engine.game_map.width):
@@ -113,38 +117,38 @@ class Renderer:
 		entities_in_render_order = sorted(self.engine.entities, key=lambda x: x.render_order.value)
 		for entity in entities_in_render_order:
 			self.draw_entity(self.engine.con, entity, self.engine.fov_map, self.engine.game_map)
-
-		libtcod.console_blit(self.engine.con, 0, 0, self.constants['screen_width'], self.constants['screen_height'], 0, 0, 0)
+		
+		self.engine.con.blit(self.root, 0, 0, 0, 0, self.constants['screen_width'], self.constants['screen_height'])
 		
 		#TODO: handle when there is no cursor
-		#self.draw_cursor(self.engine.mouse, self.engine.cursor_radius, self.engine.game_state, self.engine.target_fov_map, self.engine.fov_map_no_walls, self.engine.screen_width, self.engine.screen_height)
+		#self.draw_cursor(self.engine.mouse, self.engine.cursor_radius, self.engine.state, self.engine.target_fov_map, self.engine.fov_map_no_walls, self.engine.screen_width, self.engine.screen_height)
 		
 		#clear info panel
 		libtcod.console_set_default_background(self.engine.panel, libtcod.black)
-		libtcod.console_clear(self.engine.panel)
+		self.engine.panel.clear()
 
 		# Print the game messages, one line at a time
 		y = 1
 		for message in self.engine.message_log.messages:
 			libtcod.console_set_default_foreground(self.engine.panel, message.color)
-			libtcod.console_print_ex(self.engine.panel, self.engine.message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
+			self.engine.panel.print(self.engine.message_log.x, y, message.text, None, None, libtcod.BKGND_NONE, libtcod.LEFT)
 			y += 1
 
 		self.render_bar(self.engine.panel, 1, 1, self.constants['bar_width'], 'HP', self.engine.player.fighter.hp, self.engine.player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
 		libtcod.console_print_ex(self.engine.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon Level: {0}'.format(self.engine.game_map.dungeon_level))
-		self.engine.panel.blit(self.engine.root, 0, self.constants['panel_y'], 0, 0, self.constants['screen_width'], self.constants['panel_height'])
-		if self.engine.game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
-			if self.engine.game_state == GameStates.SHOW_INVENTORY:
+		self.engine.panel.blit(self.root, 0, self.constants['panel_y'], 0, 0, self.constants['screen_width'], self.constants['panel_height'])
+		if self.engine.state.peek() in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+			if self.engine.state.peek() == GameStates.SHOW_INVENTORY:
 				inventory_title = 'Press the key next to an item to use it, or Esc to cancel.'
 			else:
 				inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.'
 
 			inventory_menu(self.engine.con, inventory_title, self.engine.player.inventory, 50, self.constants['screen_width'], self.constants['screen_height'])
 
-		elif self.engine.game_state == GameStates.LEVEL_UP:
+		elif self.engine.state.peek() == GameStates.LEVEL_UP:
 			level_up_menu(self.engine.con, 'Level up! Choose a stat to raise:', self.engine.player, 40, self.constants['screen_width'], self.constants['screen_height'])
 
-		elif self.engine.game_state == GameStates.CHARACTER_SCREEN:
+		elif self.engine.state.peek() == GameStates.CHARACTER_SCREEN:
 			character_screen(self.engine.player, 30, self.constants['screen_width'], self.constants['screen_height'])
 
 		elif len(self.engine.description_list) > 0:
@@ -190,7 +194,7 @@ class Renderer:
 			libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
 		
 		# If we have a radius greater than one then draw a circle with a radius of cursor_radius. Game state needs to be targetting, this makes it so when we cancel targetting our cursor goes back to normal
-		elif game_state == GameStates.TARGETING:
+		elif state == GameStates.TARGETING:
 			#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
 			cursor = libtcod.console.Console(screen_width + 20, screen_height)
 			libtcod.console_set_default_background(cursor, [245, 245, 245])

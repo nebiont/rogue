@@ -128,13 +128,15 @@ class InputHandler(object):
 		"""
 		if event.type == "TEXTINPUT":
 			index = ord(event.text) - ord('a')
+
+			if index >= 0:
+				self.evmanager.Post(InputEvent({'inventory_index': index}))
 		# escape pops the menu
 		elif event.type == "KEYDOWN":
 			if event.sym == libtcod.event.K_ESCAPE:
 				self.evmanager.Post(StateChangeEvent(None))
 
-		if index >= 0:
-			self.evmanager.Post(InputEvent({'inventory_index': index}))
+
 
 	def level_up(self, event):
 		"""

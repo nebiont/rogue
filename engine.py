@@ -35,10 +35,8 @@ class GameEngine:
 		evmanager.RegisterListener(self)
 		self.state = StateMachine()
 		self.running = False
-		self.root = libtcod.console_init_root(self.constants['screen_width'], self.constants['screen_height'], self.constants['window_title'], False)
 
-
-				#define main variables
+		#define main variables
 		self.constants = get_constants()
 		
 		# Create game area and info area, this will be drawn to our root console so that we can see them
@@ -79,7 +77,8 @@ class GameEngine:
 			GameStates.PLAYERS_TURN: self.player_turn,
 			GameStates.BLOCKING_ANIMATION: self.blocking_animation_update,
 			GameStates.ENEMY_TURN: self.enemy_turn,
-			GameStates.SHOW_INVENTORY: self.inventory
+			GameStates.SHOW_INVENTORY: self.inventory,
+			GameStates.DROP_INVENTORY: self.inventory
 		}
 		func = switcher.get(state)
 		func()
@@ -237,7 +236,7 @@ class GameEngine:
 		pickup = self.action.get('pickup')
 		show_inventory = self.action.get('show_inventory')
 		drop_inventory = self.action.get('drop_inventory')
-		inventory_index = self.action.get('inventory_index')
+		self.inventory_index = self.action.get('inventory_index')
 		take_stairs = self.action.get('take_stairs')
 		level_up = self.action.get('level_up')
 		show_character_screen = self.action.get('show_character_screen')
@@ -520,6 +519,10 @@ class GameEngine:
 	
 	def inventory(self):
 		#TODO: needs to pass an invetory index to use_or_drop_item when state is drop or show inventory
+		if self.state == GameStates.SHOW_INVENTORY:
+			self.use_or_drop_item(self.inventory_index, 'use')
+		else:
+			self.use_or_drop_item(self.inventory_index, 'drop')
 		return
 
 	def blocking_animation_update(self):
@@ -537,7 +540,7 @@ class GameEngine:
 				return self.player.inventory.use(item, entities=self.entities, fov_map=self.fov_map)
 
 			if action == 'drop':
-				return aelf.player.inventory.drop_item(item)
+				return self.player.inventory.drop_item(item)
 
 	def turn_swap(self):
 		if self.state.peek() == GameStates.PLAYERS_TURN:
