@@ -78,7 +78,8 @@ class GameEngine:
 			GameStates.BLOCKING_ANIMATION: self.blocking_animation_update,
 			GameStates.ENEMY_TURN: self.enemy_turn,
 			GameStates.SHOW_INVENTORY: self.inventory,
-			GameStates.DROP_INVENTORY: self.inventory
+			GameStates.DROP_INVENTORY: self.inventory,
+			GameStates.TARGETING: self.targeting
 		}
 		func = switcher.get(state)
 		func()
@@ -243,8 +244,7 @@ class GameEngine:
 		ability_1 = self.action.get('ability_1')
 		exit = self.action.get('exit')
 		fullscreen = self.action.get('fullscreen')
-		left_click = self.action.get('left_click')
-		right_click = self.action.get('right_click')
+		self.left_click = self.action.get('left_click')
 		
 
 
@@ -504,26 +504,24 @@ class GameEngine:
 			self.cursor_radius = self.targeting_item.item.function_kwargs.get('radius')
 		else:
 			self.cursor_radius = self.targeting_item.function_kwargs.get('radius')
-		if left_click:
-			self.target_x, self.target_y = left_click
+		if self.left_click:
+			self.target_x, self.target_y = self.left_click
 			if hasattr(self.targeting_item, 'item'):
 				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
 			else:
-				self.item_use_results = self.targeting_item.use(entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
-			self.player_turn_results.extend(item_use_results)
+				self.item_use_results = self.targeting_item.use(entities=self.entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+			self.player_turn_results.extend(self.item_use_results)
 			self.cursor_radius = 1
-		
-		elif right_click:
-			self.player_turn_results.append({'targeting_cancelled': True})
-			self.cursor_radius = 1	
 	
 	def inventory(self):
 		#TODO: needs to pass an invetory index to use_or_drop_item when state is drop or show inventory
-		if self.state == GameStates.SHOW_INVENTORY:
-			self.use_or_drop_item(self.inventory_index, 'use')
-		else:
-			self.use_or_drop_item(self.inventory_index, 'drop')
-		return
+		self.inventory_index = self.action.get('inventory_index')
+		if not self.inventory_index == None:
+			if self.state.peek() == GameStates.SHOW_INVENTORY:
+				self.use_or_drop_item(self.inventory_index, 'use')
+			else:
+				self.use_or_drop_item(self.inventory_index, 'drop')
+			return
 
 	def blocking_animation_update(self):
 		for animator in Animator.animators:
@@ -534,8 +532,8 @@ class GameEngine:
 	def use_or_drop_item(self, inventory_index, action: str):
 		##TODO: Use or drop item in inventory
 		#Return should extend player_turn_results
-		if inventory_index is not None and inventory_index < len(self.player.inventory.items):
-			item = self.player.inventory.items[inventory_index]
+		if self.inventory_index is not None and self.inventory_index < len(self.player.inventory.items):
+			item = self.player.inventory.items[self.inventory_index]
 			if action == 'use':
 				return self.player.inventory.use(item, entities=self.entities, fov_map=self.fov_map)
 

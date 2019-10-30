@@ -37,7 +37,7 @@ class InputHandler(object):
 						currentstate = self.engine.state.peek()
 						if currentstate == GameStates.MAIN_MENU:
 							self.main_menu(event)
-						if currentstate == GameStates.PLAYERS_TURN:
+						if currentstate == GameStates.PLAYERS_TURN or currentstate == GameStates.TARGETING:
 							self.players_turn(event)
 						if currentstate == GameStates.SHOW_INVENTORY or currentstate == GameStates.DROP_INVENTORY:
 							self.inventory(event)
@@ -48,7 +48,7 @@ class InputHandler(object):
 						if currentstate == GameStates.ROLE_MENU:
 							self.role_menu(event)
 				# handle mouse movement
-				if event.type == "MOUSEMOTION" or event.type == "MOUSEBUTTONDOWN":
+				if event.type == "MOUSEMOTION":
 					self.evmanager.Post(Mouse_event(event))
 
 	def main_menu(self, event):
@@ -88,7 +88,11 @@ class InputHandler(object):
 
 			elif key_char == '1':
 				self.evmanager.Post(InputEvent({'ability_1': True}))
-
+		elif event.type == "MOUSEBUTTONDOWN":
+			if event.button == libtcod.event.BUTTON_LEFT:
+				self.evmanager.Post(InputEvent({'left-click': True}))
+			if event.button == libtcod.event.BUTTON_RIGHT:
+				self.evmanager.Post(StateChangeEvent(None))
 		elif event.type == "KEYDOWN":
 			if event.sym == libtcod.event.K_ESCAPE:
 				self.evmanager.Post(StateChangeEvent(None))
