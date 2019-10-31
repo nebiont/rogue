@@ -38,7 +38,8 @@ class Renderer:
 		switcher = {
 			GameStates.PLAYERS_TURN: self.render_all,
 			GameStates.SHOW_INVENTORY: self.render_all,
-			GameStates.DROP_INVENTORY: self.render_all
+			GameStates.DROP_INVENTORY: self.render_all,
+			GameStates.TARGETING: self.render_all,
 		}
 		try:
 			func = switcher.get(state)
@@ -120,8 +121,8 @@ class Renderer:
 		
 		self.engine.con.blit(self.root, 0, 0, 0, 0, self.constants['screen_width'], self.constants['screen_height'])
 		
-		#TODO: handle when there is no cursor
-		#self.draw_cursor(self.engine.mouse, self.engine.cursor_radius, self.engine.state, self.engine.target_fov_map, self.engine.fov_map_no_walls, self.engine.screen_width, self.engine.screen_height)
+
+		self.draw_cursor()
 		
 		#clear info panel
 		libtcod.console_set_default_background(self.engine.panel, libtcod.black)
@@ -184,35 +185,35 @@ class Renderer:
 		# erase the character that represents this object
 		libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
 
-	def draw_cursor(self, mouse, cursor_radius, game_state, target_fov_map, fov_map_no_walls, screen_width, screen_height):
+	def draw_cursor(self):
 		
 		#Checks to see that the item we are using has no radius so that we dont waste time computing a target reticule
-		if cursor_radius == 1 or cursor_radius == None:
+		if self.engine.cursor_radius == 1 or self.engine.cursor_radius == None:
 			cursor = libtcod.console_new(1, 1)
 			libtcod.console_set_default_foreground(cursor, libtcod.white)
 			cursor.draw_rect(0, 0, 1, 1, 0, bg=libtcod.white)
-			libtcod.console_blit(cursor, 0, 0, 1, 1, 0, mouse.cx, mouse.cy, 1.0, 0.7)
+			libtcod.console_blit(cursor, 0, 0, 1, 1, 0, self.engine.mouse.motion.tile.x, self.engine.mouse.motion.tile.y, 1.0, 0.7)
 		
 		# If we have a radius greater than one then draw a circle with a radius of cursor_radius. Game state needs to be targetting, this makes it so when we cancel targetting our cursor goes back to normal
-		elif state == GameStates.TARGETING:
+		elif self.engine.state == GameStates.TARGETING:
 			#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
-			cursor = libtcod.console.Console(screen_width + 20, screen_height)
+			cursor = libtcod.console.Console(self.constants['screen_width'] + 20, self.constants['screen_height'])
 			libtcod.console_set_default_background(cursor, [245, 245, 245])
 			libtcod.console_set_key_color(cursor, [245, 245, 245])
-			cursor.draw_rect(0,0, screen_width, screen_height,0,bg=[245, 245, 245])
+			cursor.draw_rect(0,0, self.constants['screen_width'], self.constants['screen_height'],0,bg=[245, 245, 245])
 
 			#Compute FOV from the cursors perspective. This makes it so walls etc. will block our reticule from showing green
-			recompute_fov(target_fov_map, mouse.cx, mouse.cy, cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
+			recompute_fov(self.engine.target_fov_map, self.engine.mouse.motion.tile.x, self.engine.mouse.motion.tile.y, self.engine.cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
 
 			#Check all coords within the target radius from our cursors
-			for x in range(mouse.cx - cursor_radius, mouse.cx + cursor_radius + 1):
-				for y in range(mouse.cy - cursor_radius, mouse.cy + cursor_radius + 1):
-					if math.sqrt((x - mouse.cx) ** 2 + (y - mouse.cy) ** 2) <= cursor_radius:
+			for x in range(self.engine.mouse.motion.tile.x - self.engine.cursor_radius, self.mouse.motion.tile.x + self.engine.cursor_radius + 1):
+				for y in range(self.engine.mouse.motion.tile.y - self.engine.cursor_radius, self.mouse.motion.tile.y + self.engine.cursor_radius + 1):
+					if math.sqrt((x - self.engine.mouse.motion.tile.x) ** 2 + (y - self.engine.mouse.motion.tile.y) ** 2) <= self.engine.cursor_radius:
 						#This FOV is computer from the player perspective, but with walls not lighting. This makes it so that if our cursors is on a wall the reticule will be red.
-						if not libtcod.map_is_in_fov(fov_map_no_walls, x, y):
+						if not libtcod.map_is_in_fov(self.engine.fov_map_no_walls, x, y):
 							cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
 						#Check FOV of the cursors so that walls will block our reticule. If coordinate is in FOV we color it green.
-						elif libtcod.map_is_in_fov(target_fov_map, x, y):
+						elif libtcod.map_is_in_fov(self.engine.target_fov_map, x, y):
 							cursor.draw_rect(x,y,1,1,0,bg=libtcod.light_green)
 						else:
 							cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)

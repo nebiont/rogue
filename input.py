@@ -86,8 +86,6 @@ class InputHandler(object):
 			elif key_char == 'c':
 				self.evmanager.Post(InputEvent({'show_character_screen': True}))
 
-			elif key_char == '1':
-				self.evmanager.Post(InputEvent({'ability_1': True}))
 		elif event.type == "MOUSEBUTTONDOWN":
 			if event.button == libtcod.event.BUTTON_LEFT:
 				self.evmanager.Post(InputEvent({'left-click': True}))
@@ -96,6 +94,8 @@ class InputHandler(object):
 		elif event.type == "KEYDOWN":
 			if event.sym == libtcod.event.K_ESCAPE:
 				self.evmanager.Post(StateChangeEvent(None))
+			if event.sym == libtcod.event.K_KP_1:
+				self.evmanager.Post(InputEvent({'ability_1': True}))
 		
 			# Movement keys
 			if event.sym == libtcod.event.K_UP or event.sym == libtcod.event.K_KP_8:

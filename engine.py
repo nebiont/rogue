@@ -217,9 +217,13 @@ class GameEngine:
 		self.prev_mouse_y = None
 		self.prev_mouse_x = None
 
+		self.player_turn_results = []
+
 		self.state.pop()
 		self.state.push(GameStates.PLAYERS_TURN)
 		self.state_control(self.state.peek())
+
+		
 
 	def player_turn(self):
 
@@ -245,11 +249,6 @@ class GameEngine:
 		exit = self.action.get('exit')
 		fullscreen = self.action.get('fullscreen')
 		self.left_click = self.action.get('left_click')
-		
-
-
-		#Instatiate our message queue for the players turn
-		self.player_turn_results = []
 
 		# Player Actions
 		# Move
@@ -496,7 +495,8 @@ class GameEngine:
 						self.player.fighter.base_max_hp += hp_increase
 						self.player.fighter.hp += hp_increase
 						self.message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow)) 
-
+		#Clear results queue for next turn
+		self.player_turn_results = []
 
 	def targeting(self):
 		#TODO: Needs to handle input
@@ -517,11 +517,17 @@ class GameEngine:
 		#TODO: needs to pass an invetory index to use_or_drop_item when state is drop or show inventory
 		self.inventory_index = self.action.get('inventory_index')
 		if not self.inventory_index == None:
-			if self.state.peek() == GameStates.SHOW_INVENTORY:
-				self.use_or_drop_item(self.inventory_index, 'use')
-			else:
-				self.use_or_drop_item(self.inventory_index, 'drop')
-			return
+			try:
+				if self.state.peek() == GameStates.SHOW_INVENTORY:
+					self.player_turn_results.extend(self.use_or_drop_item(self.inventory_index, 'use'))
+					self.state.pop()
+				else:
+					self.player_turn_results.extend(self.use_or_drop_item(self.inventory_index, 'drop'))
+					self.state.pop()
+				return
+			except :
+				return
+
 
 	def blocking_animation_update(self):
 		for animator in Animator.animators:
@@ -530,15 +536,17 @@ class GameEngine:
 
 	
 	def use_or_drop_item(self, inventory_index, action: str):
-		##TODO: Use or drop item in inventory
-		#Return should extend player_turn_results
-		if self.inventory_index is not None and self.inventory_index < len(self.player.inventory.items):
-			item = self.player.inventory.items[self.inventory_index]
-			if action == 'use':
-				return self.player.inventory.use(item, entities=self.entities, fov_map=self.fov_map)
+		try:
+			if self.inventory_index is not None and self.inventory_index < len(self.player.inventory.items):
+				item = self.player.inventory.items[self.inventory_index]
+				if action == 'use':
+					return self.player.inventory.use(item, entities=self.entities, fov_map=self.fov_map)
 
-			if action == 'drop':
-				return self.player.inventory.drop_item(item)
+				if action == 'drop':
+					return self.player.inventory.drop_item(item)
+		except:
+			return None
+
 
 	def turn_swap(self):
 		if self.state.peek() == GameStates.PLAYERS_TURN:
