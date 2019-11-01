@@ -251,7 +251,7 @@ class GameEngine:
 		ability_1 = self.action.get('ability_1')
 		exit = self.action.get('exit')
 		fullscreen = self.action.get('fullscreen')
-		self.left_click = self.action.get('left_click')
+		
 
 		# Player Actions
 		# Move
@@ -510,11 +510,12 @@ class GameEngine:
 		if left_click:
 			self.target_x, self.target_y = self.mouse.button.tile
 			if hasattr(self.targeting_item, 'item'):
-				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=self.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
 			else:
-				self.item_use_results = self.targeting_item.use(entities=self.entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
+				self.item_use_results = self.targeting_item.use(entities=self.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
 			self.player_turn_results.extend(self.item_use_results)
 			self.cursor_radius = 1
+			self.process_turn_results()
 	
 	def inventory(self):
 		#TODO: needs to pass an invetory index to use_or_drop_item when state is drop or show inventory
@@ -552,13 +553,14 @@ class GameEngine:
 
 
 	def turn_swap(self):
-		if self.state.peek() == GameStates.PLAYERS_TURN:
+		if self.state.peek() == GameStates.ENEMY_TURN:
+			self.state.pop()
+			self.state.push(GameStates.PLAYERS_TURN)
+		else:
 			self.state.pop()
 			self.state.push(GameStates.ENEMY_TURN)
 
-		elif self.state.peek() == GameStates.ENEMY_TURN:
-			self.state.pop()
-			self.state.push(GameStates.PLAYERS_TURN)
+
 
 class StateMachine(object):
 	"""

@@ -53,7 +53,6 @@ class InputHandler(object):
 						if currentstate == GameStates.ROLE_MENU:
 							self.role_menu(event)
 
-
 	def main_menu(self, event):
 		"""
 		Handles menu key events.
