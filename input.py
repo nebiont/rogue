@@ -29,6 +29,11 @@ class InputHandler(object):
 				# handle window manager closing our window
 				if event.type == "QUIT":
 					self.evmanager.Post(QuitEvent())
+
+				# pass mouse events so that we can reference them in engine
+				if event.type == "MOUSEMOTION" or event.type == "MOUSEBUTTONDOWN":
+					self.evmanager.Post(Mouse_event(event))
+
 				# handle key down events
 				if event.type == "KEYDOWN" or event.type == "TEXTINPUT" or event.type == "MOUSEBUTTONDOWN":
 					if event.type =="KEYDOWN" and event.sym == libtcod.KEY_ESCAPE:
@@ -47,9 +52,7 @@ class InputHandler(object):
 							self.level_up(event)
 						if currentstate == GameStates.ROLE_MENU:
 							self.role_menu(event)
-				# handle mouse movement
-				if event.type == "MOUSEMOTION":
-					self.evmanager.Post(Mouse_event(event))
+
 
 	def main_menu(self, event):
 		"""
@@ -88,7 +91,7 @@ class InputHandler(object):
 
 		elif event.type == "MOUSEBUTTONDOWN":
 			if event.button == libtcod.event.BUTTON_LEFT:
-				self.evmanager.Post(InputEvent({'left-click': True}))
+				self.evmanager.Post(InputEvent({'left_click': True}))
 			if event.button == libtcod.event.BUTTON_RIGHT:
 				self.evmanager.Post(StateChangeEvent(None))
 		elif event.type == "KEYDOWN":
@@ -120,11 +123,6 @@ class InputHandler(object):
 			elif event.sym == libtcod.event.K_KP_ENTER:
 				self.evmanager.Post(InputEvent({'take_stairs': True}))
 
-		elif event.type == "MOUSEBUTTONDOWN":
-			if event.button == libtcod.event.BUTTON_LEFT:
-				self.evmanager.Post(InputEvent({'left-click': event.tile}))
-			elif event.button == libtcod.event.BUTTON_RIGHT:
-				self.evmanager.Post(InputEvent({'right-click': event.tile}))
 							
 	def inventory(self, event):
 		"""

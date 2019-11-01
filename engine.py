@@ -53,7 +53,10 @@ class GameEngine:
 		self.show_game = False
 		self.show_load_error_message = False
 
+		#input related
 		self.mouse = MouseHandler()
+		self.action = {}
+
 		self.main_menu_background_image = libtcod.image_load(os.path.join(definitions.ROOT_DIR,'data','menu_background.png'))
 
 		self.fov_recompute = None
@@ -61,7 +64,7 @@ class GameEngine:
 		self.target_fov_map = None
 		self.fov_map_no_walls = None
 
-		self.action = {}
+		
 
 		mixer.init()
 		mixer.music.load(os.path.join(definitions.ROOT_DIR, 'data', 'music', 'title.mp3'))
@@ -499,13 +502,13 @@ class GameEngine:
 		self.player_turn_results = []
 
 	def targeting(self):
-		#TODO: Needs to handle input
+		left_click = self.action.get('left_click')
 		if hasattr(self.targeting_item, 'item'):
 			self.cursor_radius = self.targeting_item.item.function_kwargs.get('radius')
 		else:
 			self.cursor_radius = self.targeting_item.function_kwargs.get('radius')
-		if self.left_click:
-			self.target_x, self.target_y = self.left_click
+		if left_click:
+			self.target_x, self.target_y = self.mouse.button.tile
 			if hasattr(self.targeting_item, 'item'):
 				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=entities, fov_map=fov_map, game_map=game_map, target_fov_map=target_fov_map,target_x=target_x, target_y=target_y)
 			else:
