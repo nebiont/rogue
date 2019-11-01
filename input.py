@@ -48,7 +48,7 @@ class InputHandler(object):
 						if currentstate == GameStates.ROLE_MENU:
 							self.role_menu(event)
 				# handle mouse movement
-				if event.type == "MOUSEMOTION":
+				if event.type == "MOUSEMOTION" or event.type == "MOUSEBUTTONDOWN":
 					self.evmanager.Post(Mouse_event(event))
 
 	def main_menu(self, event):
@@ -88,7 +88,7 @@ class InputHandler(object):
 
 		elif event.type == "MOUSEBUTTONDOWN":
 			if event.button == libtcod.event.BUTTON_LEFT:
-				self.evmanager.Post(InputEvent({'left-click': True}))
+				self.evmanager.Post(InputEvent({'left_click': True}))
 			if event.button == libtcod.event.BUTTON_RIGHT:
 				self.evmanager.Post(StateChangeEvent(None))
 		elif event.type == "KEYDOWN":
