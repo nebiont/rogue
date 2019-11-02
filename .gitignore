@@ -7,3 +7,4 @@ setup.py
 savegame.*
 *.code-workspace
 .vscode/settings.json
+.vscode/settings.json
