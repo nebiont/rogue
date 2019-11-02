@@ -36,7 +36,7 @@ class InputHandler(object):
 
 				# handle key down events
 				if event.type == "KEYDOWN" or event.type == "TEXTINPUT" or event.type == "MOUSEBUTTONDOWN":
-					if event.type =="KEYDOWN" and event.sym == libtcod.KEY_ESCAPE:
+					if event.type =="KEYDOWN" and event.sym == libtcod.event.K_ESCAPE:
 						self.evmanager.Post(StateChangeEvent(None))
 					else:
 						currentstate = self.engine.state.peek()
@@ -46,8 +46,6 @@ class InputHandler(object):
 							self.players_turn(event)
 						if currentstate == GameStates.SHOW_INVENTORY or currentstate == GameStates.DROP_INVENTORY:
 							self.inventory(event)
-						# if currentstate == GameStates.TARGETING:
-						# 	self.targeting()
 						if currentstate == GameStates.LEVEL_UP:
 							self.level_up(event)
 						if currentstate == GameStates.ROLE_MENU:

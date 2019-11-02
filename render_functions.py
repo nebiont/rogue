@@ -40,6 +40,7 @@ class Renderer:
 			GameStates.SHOW_INVENTORY: self.render_all,
 			GameStates.DROP_INVENTORY: self.render_all,
 			GameStates.TARGETING: self.render_all,
+			GameStates.CHARACTER_SCREEN: self.render_all
 		}
 		try:
 			func = switcher.get(state)
@@ -121,8 +122,11 @@ class Renderer:
 		
 		self.engine.con.blit(self.root, 0, 0, 0, 0, self.constants['screen_width'], self.constants['screen_height'])
 		
-
-		self.draw_cursor()
+		# Need to catch the error that happens if the cursor is out of the window
+		try:
+			self.draw_cursor()
+		except:
+			pass
 		
 		#clear info panel
 		libtcod.console_set_default_background(self.engine.panel, libtcod.black)
@@ -195,7 +199,7 @@ class Renderer:
 			libtcod.console_blit(cursor, 0, 0, 1, 1, 0, self.engine.mouse.motion.tile.x, self.engine.mouse.motion.tile.y, 1.0, 0.7)
 		
 		# If we have a radius greater than one then draw a circle with a radius of cursor_radius. Game state needs to be targetting, this makes it so when we cancel targetting our cursor goes back to normal
-		elif self.engine.state == GameStates.TARGETING:
+		elif self.engine.state.peek() == GameStates.TARGETING:
 			#I needed to add a buffer to the screen width otherwise the targeting reticule would wrap to the otehr side of the screen when it was on the left side.
 			cursor = libtcod.console.Console(self.constants['screen_width'] + 20, self.constants['screen_height'])
 			libtcod.console_set_default_background(cursor, [245, 245, 245])
@@ -205,19 +209,21 @@ class Renderer:
 			#Compute FOV from the cursors perspective. This makes it so walls etc. will block our reticule from showing green
 			recompute_fov(self.engine.target_fov_map, self.engine.mouse.motion.tile.x, self.engine.mouse.motion.tile.y, self.engine.cursor_radius, light_walls=False, algorithm=libtcod.FOV_RESTRICTIVE)
 
+			#TODO: The current implementation can be used to see where walls are in areas that the player cant see
 			#Check all coords within the target radius from our cursors
-			for x in range(self.engine.mouse.motion.tile.x - self.engine.cursor_radius, self.mouse.motion.tile.x + self.engine.cursor_radius + 1):
-				for y in range(self.engine.mouse.motion.tile.y - self.engine.cursor_radius, self.mouse.motion.tile.y + self.engine.cursor_radius + 1):
+			for x in range(self.engine.mouse.motion.tile.x - self.engine.cursor_radius, self.engine.mouse.motion.tile.x + self.engine.cursor_radius + 1):
+				for y in range(self.engine.mouse.motion.tile.y - self.engine.cursor_radius, self.engine.mouse.motion.tile.y + self.engine.cursor_radius + 1):
 					if math.sqrt((x - self.engine.mouse.motion.tile.x) ** 2 + (y - self.engine.mouse.motion.tile.y) ** 2) <= self.engine.cursor_radius:
 						#This FOV is computer from the player perspective, but with walls not lighting. This makes it so that if our cursors is on a wall the reticule will be red.
-						if not libtcod.map_is_in_fov(self.engine.fov_map_no_walls, x, y):
+						if not self.engine.fov_map_no_walls.fov[x,y]:
 							cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
 						#Check FOV of the cursors so that walls will block our reticule. If coordinate is in FOV we color it green.
-						elif libtcod.map_is_in_fov(self.engine.target_fov_map, x, y):
+						elif self.engine.target_fov_map.fov[x,y]:
 							cursor.draw_rect(x,y,1,1,0,bg=libtcod.light_green)
 						else:
 							cursor.draw_rect(x,y,1,1,0,bg=libtcod.red)
-			libtcod.console_blit(cursor, 0, 0, 0, 0, 0,0, 0, 0, 0.4)
+			cursor.blit(self.root, 0, 0, 0, 0, 0, 0, 0, 0.4)
+			#libtcod.console_blit(cursor, 0, 0, 0, 0, 0,0, 0, 0, 0.4)
 
 				
 	

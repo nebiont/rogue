@@ -82,7 +82,8 @@ class GameEngine:
 			GameStates.ENEMY_TURN: self.enemy_turn,
 			GameStates.SHOW_INVENTORY: self.inventory,
 			GameStates.DROP_INVENTORY: self.inventory,
-			GameStates.TARGETING: self.targeting
+			GameStates.TARGETING: self.targeting,
+			GameStates.CHARACTER_SCREEN: self.player_turn
 		}
 		func = switcher.get(state)
 		func()
@@ -320,22 +321,6 @@ class GameEngine:
 			else:
 				self.message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
 
-		if level_up:
-			if level_up == 'hp':
-				self.player.fighter.con += 1
-				self.message_log.add_message(Message('Your Constitution has increased by 1!', libtcod.yellow))
-			elif level_up == 'str':
-				self.player.fighter.base_power += 1
-				self.message_log.add_message(Message('Your Strength has increased by 1!', libtcod.yellow))
-			elif level_up == 'def':
-				self.player.fighter.base_defense += 1
-				self.message_log.add_message(Message('Your Defense has increased by 1!', libtcod.yellow))
-
-			hp_increase = randint(self.player.fighter.hitdie[0], self.player.fighter.hitdie[1]) + int((self.player.fighter.con - 10) / 2)
-			self.player.fighter.base_max_hp += hp_increase
-			self.player.fighter.hp += hp_increase
-			self.message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
-			self.game_state.pop()
 
 		if show_character_screen:
 			self.state.push(GameStates.CHARACTER_SCREEN)
@@ -560,6 +545,23 @@ class GameEngine:
 			self.state.pop()
 			self.state.push(GameStates.ENEMY_TURN)
 
+	def level_up():
+		if level_up:
+			if level_up == 'hp':
+				self.player.fighter.con += 1
+				self.message_log.add_message(Message('Your Constitution has increased by 1!', libtcod.yellow))
+			elif level_up == 'str':
+				self.player.fighter.base_power += 1
+				self.message_log.add_message(Message('Your Strength has increased by 1!', libtcod.yellow))
+			elif level_up == 'def':
+				self.player.fighter.base_defense += 1
+				self.message_log.add_message(Message('Your Defense has increased by 1!', libtcod.yellow))
+
+			hp_increase = randint(self.player.fighter.hitdie[0], self.player.fighter.hitdie[1]) + int((self.player.fighter.con - 10) / 2)
+			self.player.fighter.base_max_hp += hp_increase
+			self.player.fighter.hp += hp_increase
+			self.message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
+			self.game_state.pop()
 
 
 class StateMachine(object):
