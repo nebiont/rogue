@@ -18,7 +18,8 @@ import definitions
 import os
 from time import sleep
 #TODO: implement mouse controls, im already halfway their with the tackle animation
-#TODO: make main and renderer their own classes, should allow easier passing of info also set me up to do screen shake animations
+#TODO: Targeting should be a class (our list of instance variables for the engine class is getting pretty long, shoudl split some stuff out into its own class)
+#TODO: Move the con variables (panel and con) to the render function, Main-menu and Role-Menu use them.
 
 
 class GameEngine:
@@ -83,7 +84,8 @@ class GameEngine:
 			GameStates.SHOW_INVENTORY: self.inventory,
 			GameStates.DROP_INVENTORY: self.inventory,
 			GameStates.TARGETING: self.targeting,
-			GameStates.CHARACTER_SCREEN: self.player_turn
+			GameStates.CHARACTER_SCREEN: self.player_turn,
+			GameStates.LEVEL_UP: self.level_up
 		}
 		func = switcher.get(state)
 		func()
@@ -157,7 +159,7 @@ class GameEngine:
 		elif load_saved_game:
 			try:
 				self.player, self.entities, self.game_map, self.message_log, self.game_state = load_game()
-				libtcod.console_clear(self.con)
+				self.con.clear()
 				self.state.push(GameStates.PLAY_GAME)
 			except FileNotFoundError:
 				self.show_load_error_message = True
@@ -545,7 +547,9 @@ class GameEngine:
 			self.state.pop()
 			self.state.push(GameStates.ENEMY_TURN)
 
-	def level_up():
+	def level_up(self):
+		level_up = self.action.get('level_up')
+
 		if level_up:
 			if level_up == 'hp':
 				self.player.fighter.con += 1
@@ -561,7 +565,7 @@ class GameEngine:
 			self.player.fighter.base_max_hp += hp_increase
 			self.player.fighter.hp += hp_increase
 			self.message_log.add_message(Message('Your HP has increased by {0}'.format(hp_increase) + '!', libtcod.yellow))
-			self.game_state.pop()
+			self.state.pop()
 
 
 class StateMachine(object):

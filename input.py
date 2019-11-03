@@ -143,17 +143,13 @@ class InputHandler(object):
 		"""
 		if event.type == "TEXTINPUT":
 			key_char = event.text
-		# escape pops the menu
-		elif event.type == "KEYDOWN":
-			if event.sym == libtcod.event.K_ESCAPE:
-				self.evmanager.Post(StateChangeEvent(None))
 
-		if key_char == 'a':
-			self.evmanager.Post(InputEvent({'level_up': 'hp'}))
-		elif key_char =='b':
-			self.evmanager.Post(InputEvent({'level_up': 'str'}))
-		elif key_char =='c':
-			self.evmanager.Post(InputEvent({'level_up': 'def'}))	
+			if key_char == 'a':
+				self.evmanager.Post(InputEvent({'level_up': 'hp'}))
+			elif key_char =='b':
+				self.evmanager.Post(InputEvent({'level_up': 'str'}))
+			elif key_char =='c':
+				self.evmanager.Post(InputEvent({'level_up': 'def'}))	
 
 	def role_menu(self, event):
 		"""
