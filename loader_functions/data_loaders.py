@@ -24,4 +24,4 @@ def load_game():
 
     player = entities[player_index]
 
-    return player, entities, animators, game_map, message_log, game_state
+    return player, entities, game_map, message_log, game_state

@@ -28,7 +28,7 @@
   char: '#'
   color: libtcod.red
   render_order: RenderOrder.ITEM
-  loot_chance: [[25,6]]
+  loot_chance: [[100,1]]
   description: Shoots a ball of fire
   args:
     use_function: cast_fireball

@@ -9,7 +9,7 @@
             "name": "Python: Engine.py (Integrated Terminal)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/engine.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal"
         },
         {

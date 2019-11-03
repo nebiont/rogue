@@ -1,30 +1,25 @@
-import yaml
+
 import tcod as libtcod
-from random import randint
-
-test_x = [0,0]
-test_y
-
-# item_stream = open('.\\data\\objects\\items.yaml', 'r')
-# item_list = yaml.load(item_stream)
-# loot_table = []
+import tcod.event
 
 
-# print(item_list[0]['item_component']['kwargs'])
-# for i in item_list:
-#     loot_chance = item_list[i].get('loot_chance')
-#     for r in range(loot_chance):
-#         loot_table_item = [i, loot_chance]
-#         loot_table.append(loot_table_item)
-# print(loot_table)
-# print(len(loot_table))
-# print(item_list[randint(0,2)])
-# for r in item_list:
-#     loot_table[r] = item_list[r].get('loot_chance')
+# Setup the font.
+tcod.console_set_custom_font(
+    "arial10x10.png",
+    tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
+)
+# Initialize the root console in a context.
+with tcod.console_init_root(80, 60, order="F") as root_console:
+    root_console.print_(x=0, y=0, string='Hello World!')
+    while True:
+        tcod.console_flush()  # Show the console.
+        for event in tcod.event.get():
+            print(event)
+            if event.type == "QUIT":
+                raise SystemExit()
+    # The libtcod window will be closed at the end of this with-block.
 
-#     print(loot_table)
-    #print(item_list[x].get('loot_chance'))
-    # print(x.get('name'))
-    # print(x['item_component'].get('use_function'))
-    # print(x['item_component']['kwargs'])
-    
+# test = True
+# while test == True:
+#     for event in libtcod.event.get():
+#         print(event)
