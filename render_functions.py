@@ -120,7 +120,7 @@ class Renderer:
 		#draw all entities in the list
 		entities_in_render_order = sorted(self.engine.entities, key=lambda x: x.render_order.value)
 		for entity in entities_in_render_order:
-			self.draw_entity(self.engine.con, entity, self.engine.fov_map, self.engine.game_map)
+			entity.draw(self.engine)
 		
 		self.engine.con.blit(self.root, 0, 0, 0, 0, self.constants['screen_width'], self.constants['screen_height'])
 		
@@ -167,7 +167,7 @@ class Renderer:
 
 	def clear_all(self, con, entities):
 		for entity in entities:
-			self.clear_entity(con, entity)
+			entity.clear(self.engine)
 
 	def render_bar(self, panel, x, y, total_width, name, value, maximum, bar_color, back_color):
 		bar_width = int(float(value) / maximum * total_width)
@@ -181,15 +181,6 @@ class Renderer:
 
 		libtcod.console_set_default_foreground(panel, libtcod.white)
 		libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
-
-	def draw_entity(self, con, entity, fov_map, game_map):
-		if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.item and game_map.tiles[entity.x][entity.y].explored):
-			libtcod.console_set_default_foreground(con, entity.color)
-			libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
-
-	def clear_entity(self, con, entity):
-		# erase the character that represents this object
-		libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
 
 	def draw_cursor(self):
 		

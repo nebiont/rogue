@@ -1,7 +1,8 @@
 import tcod as libtcod
 import math
 from render_functions import RenderOrder
-from components.item import Item
+
+
 #TODO: Make entities list a class attribute in the Entity class
 
 class Entity:
@@ -65,7 +66,14 @@ class Entity:
 		if self.animator:
 			self.animator.owner = self
 
+	def draw(self, engine: 'GameEngine'):
+		if libtcod.map_is_in_fov(engine.fov_map, self.x, self.y) or (self.stairs and engine.game_map.tiles[self.x][self.y].explored) or (self.item and engine.game_map.tiles[self.x][self.y].explored):
+			libtcod.console_set_default_foreground(engine.con, self.color)
+			libtcod.console_put_char(engine.con, self.x, self.y, self.char, libtcod.BKGND_NONE)
 
+	def clear(self, engine: 'GameEngine'):
+		# erase the character that represents this object
+		libtcod.console_put_char(engine.con, self.x, self.y, ' ', libtcod.BKGND_NONE)
 
 	def move(self, dx, dy):
 		# Move the entity by a given amount
