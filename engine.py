@@ -132,9 +132,9 @@ class GameEngine:
 			if Animator.blocking > 0 and not self.state.peek() == GameStates.BLOCKING_ANIMATION:
 				self.state.push(GameStates.BLOCKING_ANIMATION)
 			# Update any animators
+			self.state_control(self.state.peek())
 			for animator in Animator.animators:
 				animator.update()
-			self.state_control(self.state.peek())
 			# Clear the action so that we don't remember actions from previous game states / ticks
 			self.action = {}
 			newTick = TickEvent()
@@ -456,8 +456,6 @@ class GameEngine:
 					self.message_log.add_message(self.targeting_item.targeting_message)
 
 			if ability_used:
-				if Animator.blocking == 0:
-					# Remove targeting state and then swap to enemy turn
 					self.turn_swap()
 
 			if item_dropped:

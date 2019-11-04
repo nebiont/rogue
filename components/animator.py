@@ -65,7 +65,8 @@ class Move_To(Animator):
 		if not self.time == None:
 		
 			#if animation time is over, stop update function and clear attributes
-			self.check_if_complete()
+			if self.check_if_complete():
+				return
 
 
 			#because we have to round our coordinate values before drawing, we need to store what the float values of the x, y coords are

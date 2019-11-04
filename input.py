@@ -86,8 +86,8 @@ class InputHandler(object):
 			elif key_char == 'c':
 				self.evmanager.Post(InputEvent({'show_character_screen': True}))
 
-			elif key_char == '1':
-				self.evmanager.Post(InputEvent({'ability_1': True}))
+			# elif key_char == '1':
+			# 	self.evmanager.Post(InputEvent({'ability_1': True}))
 
 		elif event.type == "MOUSEBUTTONDOWN":
 			if event.button == libtcod.event.BUTTON_LEFT:
@@ -121,6 +121,10 @@ class InputHandler(object):
 
 			elif event.sym == libtcod.event.K_KP_ENTER:
 				self.evmanager.Post(InputEvent({'take_stairs': True}))
+
+			elif event.scancode == libtcod.event.SCANCODE_1:
+				self.evmanager.Post(InputEvent({'ability_1': True}))
+
 
 							
 	def inventory(self, event):

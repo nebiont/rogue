@@ -58,7 +58,7 @@ class Fighter:
 			results.append({'dead': self.owner, 'xp': self.xp})
 
 		else:
-			self.owner.animation = animator.Flash(self.owner, .25, libtcod.red, caller=None, blocking=True)
+			animation = animator.Flash(self.owner, .25, libtcod.red, caller=None, blocking=True)
 
 
 		return results
