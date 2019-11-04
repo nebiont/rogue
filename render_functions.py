@@ -3,6 +3,7 @@ from enum import Enum, auto
 from game_states import GameStates
 from menus import inventory_menu, entity_description, level_up_menu, character_screen, message_box, role_menu
 from fov_functions import recompute_fov
+import entity as ent
 import math
 import os
 import definitions
@@ -119,7 +120,7 @@ class Renderer:
 
 
 		#draw all entities in the list
-		entities_in_render_order = sorted(self.engine.entities, key=lambda x: x.render_order.value)
+		entities_in_render_order = sorted(ent.Entity.entities, key=lambda x: x.render_order.value)
 		for entity in entities_in_render_order:
 			entity.draw(self.engine)
 		
@@ -162,13 +163,13 @@ class Renderer:
 		elif len(self.engine.description_list) > 0:
 			entity_description(self.engine.con, self.engine.description_list, self.engine.description_index, 50, self.constants['screen_width'], self.constants['screen_height'])
 		libtcod.console_flush()
-		self.clear_all(self.engine.con, self.engine.entities)
+		self.clear_all(self.engine.con, ent.Entity.entities) 
+
 		
 		
 
 	def clear_all(self, con, entities):
-		for entity in entities:
-			entity.clear(self.engine)
+		con.clear()
 
 	def render_bar(self, panel, x, y, total_width, name, value, maximum, bar_color, back_color):
 		bar_width = int(float(value) / maximum * total_width)

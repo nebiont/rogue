@@ -4,7 +4,7 @@ from input_handlers import handle_keys, handle_mouse, handle_main_menu, handle_r
 from loader_functions.initialize_new_game import get_constants, get_game_variables, get_dummy_player
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box, role_menu
-from entity import get_blocking_entities_at_location
+from entity import get_blocking_entities_at_location, Entity
 from fov_functions import initialize_fov, recompute_fov
 from game_states import GameStates
 from death_functions import kill_monster, kill_player
@@ -45,7 +45,6 @@ class GameEngine:
 		self.panel = libtcod.console_new(self.constants['screen_width'], self.constants['panel_height'])
 
 		self.player = get_dummy_player(Warrior())
-		self.entities = []
 		self.game_map = None
 		self.message_log: MessageLog  = None
 		self.game_state = None
@@ -164,7 +163,7 @@ class GameEngine:
 		
 		elif load_saved_game:
 			try:
-				self.player, self.entities, self.game_map, self.message_log, self.game_state = load_game()
+				self.player, Entity.entities, self.game_map, self.message_log, self.game_state = load_game()
 				self.con.clear()
 				self.state.push(GameStates.PLAY_GAME)
 			except FileNotFoundError:
@@ -204,7 +203,7 @@ class GameEngine:
 			role_menu(self.con,self.constants['screen_width'],self.constants['screen_height'], self.player.role)
 			libtcod.console_flush()
 		if accept:
-			self.player, self.entities, self.game_map, self.message_log, self.game_state = get_game_variables(self.constants, self.player)
+			self.player, Entity.entities, self.game_map, self.message_log, self.game_state = get_game_variables(self.constants, self.player)
 			libtcod.console_clear(self.con)
 			self.state.pop()
 			self.state.push(GameStates.PLAY_GAME)
@@ -272,7 +271,7 @@ class GameEngine:
 
 				# Check to see if the location we want to move to is blocked by a wall or inhabited by a creature
 				if not self.game_map.is_blocked(destination_x, destination_y):
-					target = get_blocking_entities_at_location(self.entities, destination_x, destination_y)
+					target = get_blocking_entities_at_location(Entity.entities, destination_x, destination_y)
 
 					# If blocked by a creature, attack
 					if target:
@@ -287,7 +286,7 @@ class GameEngine:
 				self.turn_swap()
 
 		elif pickup:
-			for entity in self.entities:
+			for entity in Entity.entities:
 				if entity.item and entity.x == self.player.x and entity.y == self.player.y:
 					pickup_results = self.player.inventory.add_item(entity)
 					self.player_turn_results.extend(pickup_results)
@@ -317,9 +316,9 @@ class GameEngine:
 
 
 		if take_stairs:
-			for entity in self.entities:
+			for entity in Entity.entities:
 				if entity.stairs and entity.x == self.player.x and entity.y == self.player.y: 
-					self.entities = self.game_map.next_floor(self.player, self.message_log, self.constants)
+					Entity.entities = self.game_map.next_floor(self.player, self.message_log, self.constants)
 					self.fov_map = initialize_fov(self.game_map)
 					self.target_fov_map = initialize_fov(self.game_map)
 					self.fov_map_no_walls = initialize_fov(self.game_map)
@@ -341,7 +340,7 @@ class GameEngine:
 				self.player_turn_results.append({'targeting_cancelled': True})
 				self.cursor_radius = 1
 			else:
-				save_game(self.player, self.entities, self.game_map, self.message_log, self.game_state)
+				save_game(self.player, Entity.entities, self.game_map, self.message_log, self.game_state)
 				return True
 
 
@@ -352,9 +351,9 @@ class GameEngine:
 
 
 	def enemy_turn(self):
-		for entity in self.entities:
+		for entity in Entity.entities:
 			if entity.ai:
-				enemy_turn_results = entity.ai.take_turn(self.player, self.fov_map, self.game_map, self.entities)
+				enemy_turn_results = entity.ai.take_turn(self.player, self.fov_map, self.game_map, Entity.entities)
 
 				# Capture enemy turn message queue, analyze and react accordingly.
 				for enemy_turn_result in enemy_turn_results:
@@ -382,7 +381,7 @@ class GameEngine:
 		# Show object descriptions
 		if self.description_recompute == True:
 
-			for entity in self.entities:
+			for entity in Entity.entities:
 
 				if (self.prev_mouse_x != self.mouse.motion.tile.x) or (self.prev_mouse_y != self.mouse.motion.tile.y):
 					self.description_list = []
@@ -439,7 +438,7 @@ class GameEngine:
 				self.message_log.add_message(message)
 
 			if item_added:
-				self.entities.remove(item_added)
+				Entity.entities.remove(item_added)
 
 				self.turn_swap()
 
@@ -459,7 +458,7 @@ class GameEngine:
 					self.turn_swap()
 
 			if item_dropped:
-				self.entities.append(item_dropped)
+				Entity.entities.append(item_dropped)
 				self.turn_swap()
 
 			if equip:
@@ -503,9 +502,9 @@ class GameEngine:
 		if left_click:
 			self.target_x, self.target_y = self.mouse.button.tile
 			if hasattr(self.targeting_item, 'item'):
-				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=self.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
+				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=Entity.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
 			else:
-				self.item_use_results = self.targeting_item.use(entities=self.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
+				self.item_use_results = self.targeting_item.use(entities=Entity.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
 			left_click = None
 			self.player_turn_results.extend(self.item_use_results)
 			self.cursor_radius = 1
@@ -544,7 +543,7 @@ class GameEngine:
 			if self.inventory_index is not None and self.inventory_index < len(self.player.inventory.items):
 				item = self.player.inventory.items[self.inventory_index]
 				if action == 'use':
-					return self.player.inventory.use(item, entities=self.entities, fov_map=self.fov_map)
+					return self.player.inventory.use(item, entities=Entity.entities, fov_map=self.fov_map)
 
 				if action == 'drop':
 					return self.player.inventory.drop_item(item)

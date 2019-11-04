@@ -9,8 +9,9 @@ class Entity:
 	"""
 	A generic object to represent players, enemies, items, etc.
 	"""
-
+	entities = []
 	def __init__(self, x, y, char, color, name, description, blocks=False, render_order=RenderOrder.CORPSE, fighter=None, ai=None, item=None, inventory=None, stairs=None, level=None, equipment=None, equippable=None, role=None, abilities=None, animator=None):
+		Entity.entities.append(self)
 		self.x = x
 		self.y = y
 		self.char = char
@@ -74,6 +75,10 @@ class Entity:
 	def clear(self, engine: 'GameEngine'):
 		# erase the character that represents this object
 		libtcod.console_put_char(engine.con, self.x, self.y, ' ', libtcod.BKGND_NONE)
+
+	def remove(self):
+		Entity.entities.remove(self)
+		del self
 
 	def move(self, dx, dy):
 		# Move the entity by a given amount
@@ -153,8 +158,10 @@ class Entity:
 		return math.sqrt(dx ** 2 + dy ** 2)
 
 class Text(Entity):
+	entities = None
 
 	def __init__(self, x, y, text, color, render_order=RenderOrder.UI):
+		Entity.entities.append(self)
 		self.x = x
 		self.y = y
 		self.text = text
@@ -162,11 +169,14 @@ class Text(Entity):
 		self.render_order = render_order
 		self.blocks = False
 		self.ai = None
+		self.blank = []
+		for i in range(1, len(self.text)):
+			self.blank += ' '
 
 	def draw(self, engine: 'GameEngine'):
 		overlay = libtcod.console.Console(len(self.text), 1, order='F')
 		overlay.print(0,0, self.text, fg=self.color, bg=None, bg_blend=libtcod.BKGND_NONE)
-		overlay.blit(engine.con, self.x, self.y, 0, 0, 0, 0, 1.0, 0)
+		overlay.blit(engine.con, self.x, self.y, 0, 0, 0, 0, 1, 0)
 
 	def clear(self, engine: 'GameEngine'):
 		return

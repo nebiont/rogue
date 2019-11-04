@@ -1,5 +1,5 @@
 import tcod as libtcod
-from entity import Entity
+from entity import Entity, Text
 
 #TODO: Could split the update types out into each animation method, and then maintain an instance variable list that tracks what animation methods to call and then call them in the update funciton of the Animator class.
 #TODO: Handle allowing the animator to set engine.fov_recompute = True to allow some animations to update the player FOV.
@@ -156,4 +156,21 @@ class Flash(Animator):
 			self.time -= libtcod.sys_get_last_frame_length()
 
 
+class FloatingText(Animator):
+	animators = None
+	
 
+	def __init__(self, start_x, start_y, text, color, target_x: int, target_y: int, speed: int, caller=None, blocking=False):
+		self.text_entity = Text(start_x, start_y, text, color)
+		self.animation = Move_To(self.text_entity, target_x, target_y, speed)
+		Animator.animators.append(self)
+		if self.blocking == True:
+			Animator.blocking += 1
+
+	def update(self):
+		if self.animation.time <= 0:
+			self.text_entity.remove()
+			self.remove()
+
+
+	

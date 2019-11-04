@@ -80,5 +80,7 @@ class Fighter:
 		else:
 			results.append({'message': Message('{0} attacks {1} but misses.'.format(
 				self.owner.name.capitalize(), target.name), libtcod.white)})
+			text = '*MISS*'
+			animation = animator.FloatingText(int(self.owner.x - (len(text) / 2)), self.owner.y, text, libtcod.green, int(self.owner.x - (len(text) / 2)), self.owner.y - 5, 10) 
 
 		return results        
