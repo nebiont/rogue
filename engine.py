@@ -131,6 +131,9 @@ class GameEngine:
 			# Detect blocking animations and change gamestate to blocking
 			if Animator.blocking > 0 and not self.state.peek() == GameStates.BLOCKING_ANIMATION:
 				self.state.push(GameStates.BLOCKING_ANIMATION)
+			# Update any animators
+			for animator in Animator.animators:
+				animator.update()
 			self.state_control(self.state.peek())
 			# Clear the action so that we don't remember actions from previous game states / ticks
 			self.action = {}
@@ -531,8 +534,6 @@ class GameEngine:
 
 
 	def blocking_animation_update(self):
-		for animator in Animator.animators:
-			animator.update()
 		if Animator.blocking == 0:
 			# If the blocking animation is done, remove the blocking gamestate and then process turn results. Will need
 			# to reimplement if I want blocking animations on the enemies turn.

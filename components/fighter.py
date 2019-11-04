@@ -1,6 +1,7 @@
 import tcod as libtcod
 from random import randint
 from game_messages import Message
+import components.animator as animator
 
 class Fighter:
 	def __init__(self, hp, defense, power, xp=0, hitdie=None, con=None, dmg=None):
@@ -55,6 +56,10 @@ class Fighter:
 
 		if self.hp <= 0:
 			results.append({'dead': self.owner, 'xp': self.xp})
+
+		else:
+			self.owner.animation = animator.Flash(self.owner, .25, libtcod.red, caller=None, blocking=True)
+
 
 		return results
 	
