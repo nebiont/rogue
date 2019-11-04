@@ -1,5 +1,6 @@
 import tcod as libtcod
 from game_messages import Message
+import components.animator as animator
 
 ## if there is an an entity at targ_x targ_y then move final position 1 x,y towards caster
 def tackle(*args, **kwargs):
@@ -22,11 +23,12 @@ def tackle(*args, **kwargs):
         for entity in entities:
             if entity.x == target_x and entity.y == target_y and not entity.fighter == None:
                 results.append({'ability_used': True, 'message': Message('{0} charges towards the {1}!'.format(caster.name, entity.name), libtcod.green)})
-                caster.animator.move_to(target_x, target_y, 30, caller, blocking=True)
+                animation = animator.Move_To(caster, target_x, target_y, 30, caller, blocking=True)
                 return results
         else:    
             results.append({'ability_used': True, 'message': Message('{0} charges forward!'.format(caster.name), libtcod.green)})
-            caster.animator.move_to(target_x, target_y, 30, caller, blocking=True)
+            animation = animator.Move_To(caster, target_x, target_y, 30, caller, blocking=True)
             return results
 
-    return results
+    return results 
+

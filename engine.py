@@ -294,10 +294,11 @@ class GameEngine:
 				self.message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
 		#Ability complete checks:
 		for ability in self.player.abilities:
-			if self.player.animator.caller == ability and self.player.animator.complete:
-				self.player_turn_results.extend(ability.use(complete=True))
-				self.player.animator.caller = None
-				self.player.animator.complete = None
+			if not ability.animator == None:
+				if ability.animator.complete:
+					self.player_turn_results.extend(ability.use(complete=True))
+					ability.animator = None
+
 
 		if ability_1:
 			self.player_turn_results.extend(self.player.abilities[0].use())
