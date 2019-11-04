@@ -14,6 +14,7 @@ class RenderOrder(Enum):
 	CORPSE = auto()
 	ITEM = auto()
 	ACTOR = auto()
+	UI = auto()
 class Renderer:
 
 	def __init__(self, evmanager, game_engine):

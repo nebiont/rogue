@@ -152,6 +152,25 @@ class Entity:
 		dy = other.y - self.y
 		return math.sqrt(dx ** 2 + dy ** 2)
 
+class Text(Entity):
+
+	def __init__(self, x, y, text, color, render_order=RenderOrder.UI):
+		self.x = x
+		self.y = y
+		self.text = text
+		self.color = color
+		self.render_order = render_order
+		self.blocks = False
+		self.ai = None
+
+	def draw(self, engine: 'GameEngine'):
+		overlay = libtcod.console.Console(len(self.text), 1, order='F')
+		overlay.print(0,0, self.text, fg=self.color, bg=None, bg_blend=libtcod.BKGND_NONE)
+		overlay.blit(engine.con, self.x, self.y, 0, 0, 0, 0, 1.0, 0)
+
+	def clear(self, engine: 'GameEngine'):
+		return
+
 
 def get_blocking_entities_at_location(entities, destination_x, destination_y):
 	for entity in entities:
