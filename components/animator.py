@@ -79,10 +79,22 @@ class Move_To(Animator):
 			final_delta_y = self.delta_y * (libtcod.sys_get_last_frame_length() / self.time)
 			self.x += final_delta_x
 			self.y += final_delta_y
-			self.owner.x = round(self.x)
-			self.owner.y = round(self.y)
+
+			# We clamp to the target coordinates, otherwise overshooting the target is possible due to the rounding.
+			# The if statements are what clamps it
+			if abs(self.target_x - abs(round(self.x))) <= 1:
+				self.owner.x = self.target_x
+			else:
+				self.owner.x = round(self.x)
+
+			if abs(self.target_y - abs(round(self.y))) <= 1:
+				self.owner.y = self.target_y
+			else: 
+				self.owner.y = round(self.y)
+
 			self.delta_x -= final_delta_x
 			self.delta_y -= final_delta_y
+
 			self.time -= libtcod.sys_get_last_frame_length()
 
 class Flash(Animator):
