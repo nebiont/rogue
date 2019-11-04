@@ -12,6 +12,15 @@ class Animator:
 
 	def update(self):
 		return
+	
+	def check_if_complete(self):
+		if self.time <= 0:
+			if self.blocking == True:
+				Animator.blocking -= 1
+			# Remove this animator as it is no longer needed
+			self.remove()
+			return None
+
 	def remove(self):
 		Animator.animators.remove(self)
 		del self
@@ -32,6 +41,7 @@ class Move_To(Animator):
 		self.caller = caller
 		self.complete = None
 		self.owner = owner
+		self.blocking = blocking
 		Animator.animators.append(self)
 
 		if caller:
@@ -39,7 +49,7 @@ class Move_To(Animator):
 		#If this is a blocking animation we add 1 to Animator.blocking and then read it in the game loop 
 		#so that we can set the gamestate to blocking. We use an int rather than a bool so that we can keep track of how many
 		#animators are blocking. We only unblock the game state when all blocking animators are done.
-		if blocking == True:
+		if self.blocking == True:
 			Animator.blocking += 1
 
 		#Calculate delta x,y values
@@ -54,16 +64,7 @@ class Move_To(Animator):
 		if not self.time == None:
 		
 			#if animation time is over, stop update function and clear attributes
-			if self.time <= 0:
-				self.anim_type = None
-				self.time = None
-				self.x = None
-				self.y = None
-				self.complete = True
-				Animator.blocking -= 1
-				# Remove this animator as it is no longer needed
-				self.remove()
-				return None
+			self.check_if_complete()
 
 
 			#because we have to round our coordinate values before drawing, we need to store what the float values of the x, y coords are
@@ -108,17 +109,7 @@ class Flash(Animator):
 		if not self.time == None:
 		
 			#if animation time is over, stop update function and clear attributes
-			if self.time <= 0:
-				self.anim_type = None
-				self.time = None
-				self.x = None
-				self.y = None
-				self.complete = True
-				Animator.blocking -= 1
-				# Remove this animator as it is no longer needed
-				self.remove()
-				return None
-
+			self.check_if_complete()
 
 			#because we have to round our coordinate values before drawing, we need to store what the float values of the x, y coords are
 			#we will adjust these values and then set the entiites x,y to match a rounded value of these. then we can refer to these on the next tick
