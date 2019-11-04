@@ -41,7 +41,8 @@ class Renderer:
 			GameStates.DROP_INVENTORY: self.render_all,
 			GameStates.TARGETING: self.render_all,
 			GameStates.CHARACTER_SCREEN: self.render_all,
-			GameStates.LEVEL_UP: self.render_all
+			GameStates.LEVEL_UP: self.render_all,
+			GameStates.BLOCKING_ANIMATION: self.render_all
 		}
 		try:
 			func = switcher.get(state)

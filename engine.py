@@ -128,6 +128,9 @@ class GameEngine:
 		self.evmanager.Post(InitializeEvent())
 		self.state.push(GameStates.MAIN_MENU)
 		while self.running:
+			# Detect blocking animations and change gamestate to blocking
+			if Animator.blocking > 0 and not self.state.peek() == GameStates.BLOCKING_ANIMATION:
+				self.state.push(GameStates.BLOCKING_ANIMATION)
 			self.state_control(self.state.peek())
 			# Clear the action so that we don't remember actions from previous game states / ticks
 			self.action = {}
@@ -450,6 +453,7 @@ class GameEngine:
 
 			if ability_used:
 				if Animator.blocking == 0:
+					# Remove targeting state and then swap to enemy turn
 					self.turn_swap()
 
 			if item_dropped:
@@ -500,8 +504,13 @@ class GameEngine:
 				self.item_use_results = self.player.inventory.use(self.targeting_item, entities=self.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
 			else:
 				self.item_use_results = self.targeting_item.use(entities=self.entities, fov_map=self.fov_map, game_map=self.game_map, target_fov_map=self.target_fov_map,target_x=self.target_x, target_y=self.target_y)
+			left_click = None
 			self.player_turn_results.extend(self.item_use_results)
 			self.cursor_radius = 1
+			# Cancel targeting if the ability or item was used
+			for item_use_result in self.item_use_results:
+				if item_use_result.get('ability_used') or item_use_result.get('consumed'):
+					self.state.pop()
 			self.process_turn_results()
 	
 	def inventory(self):
@@ -523,7 +532,11 @@ class GameEngine:
 	def blocking_animation_update(self):
 		for animator in Animator.animators:
 			animator.update()
-		self.state.pop()
+		if Animator.blocking == 0:
+			# If the blocking animation is done, remove the blocking gamestate and then process turn results. Will need
+			# to reimplement if I want blocking animations on the enemies turn.
+			self.state.pop()
+			self.process_turn_results()
 
 	
 	def use_or_drop_item(self, inventory_index, action: str):
@@ -543,7 +556,7 @@ class GameEngine:
 		if self.state.peek() == GameStates.ENEMY_TURN:
 			self.state.pop()
 			self.state.push(GameStates.PLAYERS_TURN)
-		else:
+		elif self.state.peek() == GameStates.PLAYERS_TURN:
 			self.state.pop()
 			self.state.push(GameStates.ENEMY_TURN)
 

@@ -21,7 +21,7 @@ def tackle(*args, **kwargs):
     if results[0].get('success'):
         for entity in entities:
             if entity.x == target_x and entity.y == target_y and not entity.fighter == None:
-                results.append({'message': Message('{0} charges towards the {1}!'.format(caster.name, entity.name), libtcod.green)})
+                results.append({'ability_used': True, 'message': Message('{0} charges towards the {1}!'.format(caster.name, entity.name), libtcod.green)})
                 caster.animator.move_to(target_x, target_y, 30, caller, blocking=True)
                 return results
         else:    
